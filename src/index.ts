@@ -1,4 +1,3 @@
-import './engine';
 import { DIRECTION, RecyclerView, RecyclerViewOptions } from './engine';
 import './styles.scss';
 
@@ -6,6 +5,8 @@ export interface D {
   a: number;
   b: number;
   index: number;
+  someValue: string;
+  _event?: (e: Event) => void;
 }
 
 const root1 = document.getElementById('root1') as HTMLDivElement;
@@ -13,7 +14,7 @@ const root1 = document.getElementById('root1') as HTMLDivElement;
 if (root1) {
   root1.style.height = '500px';
 
-  const rowNumberToCreate = 100000;
+  const rowNumberToCreate = 300000;
 
   const options: RecyclerViewOptions<D> = {
     preload: 50,
@@ -21,16 +22,28 @@ if (root1) {
       a: Math.random(),
       b: Math.random(),
       index: index,
+      someValue: '',
     })),
     size: (params) => (params.data.a ? params.data.a * 100 : 100),
     layout: (params) => {
-      return `
-        ${params.index}
+      const element = document.createElement('div');
+      element.innerHTML = `
+        <input type="text" value=${params.data.someValue} >
       `;
+      const input = element.querySelector('input') as HTMLInputElement;
+      input.addEventListener('input', (e: Event) => {
+        params.data.someValue = (<HTMLInputElement>e.target).value;
+      });
+      return element;
     },
     mount: (params) => {
-      params.element.innerHTML = params.index.toString();
-      return true;
+      console.log('mount');
+      // const input = params.element.querySelector('input') as HTMLInputElement;
+      // input.value = params.data.someValue;
+      // input.addEventListener('input', (e: Event) => {
+      //   params.data.someValue = (<HTMLInputElement>e.target).value;
+      // });
+      return false;
     },
   };
 
@@ -52,6 +65,7 @@ if (root2) {
       a: Math.random(),
       b: Math.random(),
       index: index,
+      someValue: '',
     })),
     size: (params) => (params.data.a ? params.data.a * 100 : 100),
     layout: (params) => {

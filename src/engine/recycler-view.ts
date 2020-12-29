@@ -1,49 +1,5 @@
-import { DEFAULT_ITEM_SIZE } from '../setting/constant';
-import { toPx } from './parser';
-
-export class VirtualElement<T> {
-  public parent: RecyclerView<T>;
-  public index: number;
-  public startSize: number;
-  public endSize: number;
-  public element: HTMLElement | null = null;
-  public data: T;
-
-  constructor(
-    parent: RecyclerView<T>,
-    index: number,
-    startSize: number,
-    endSize: number,
-    data: T
-  ) {
-    this.index = index;
-    this.startSize = startSize;
-    this.endSize = endSize;
-    this.parent = parent;
-    this.data = data;
-  }
-
-  mount(element: HTMLElement): void {
-    if (this.parent.options.direction === DIRECTION.VERTICAL) {
-      element.style.top = toPx(this.startSize);
-      element.style.height = toPx(this.endSize - this.startSize);
-    } else if (this.parent.options.direction === DIRECTION.HORIZONTAL) {
-      element.style.left = toPx(this.startSize);
-      element.style.width = toPx(this.endSize - this.startSize);
-    }
-    this.element = element;
-  }
-
-  unmount(): HTMLElement {
-    const element = this.element;
-    this.element = null;
-    if (element) {
-      return element;
-    } else {
-      throw new Error('element not mounted');
-    }
-  }
-}
+import { DEFAULT_ITEM_SIZE } from '../setting';
+import { toPx, VirtualElement } from './';
 
 export enum DIRECTION {
   VERTICAL = 'vertical',
@@ -228,20 +184,22 @@ export class RecyclerView<T> {
    */
   initializeSize(): void {
     let lastViewSize = 0;
-    this.virtualDoms.push(
-      ...this.options.data.map((data: T, index: number) => {
-        const currentViewSize = lastViewSize;
-        const virtualDomSize = this.getSize(data);
-        lastViewSize += virtualDomSize;
-        return new VirtualElement<T>(
+
+    this.options.data.forEach((data: T, index: number) => {
+      const currentViewSize = lastViewSize;
+      const virtualDomSize = this.getSize(data);
+      lastViewSize += virtualDomSize;
+      this.virtualDoms.push(
+        new VirtualElement<T>(
           this,
           index,
           currentViewSize,
           currentViewSize + virtualDomSize,
           data
-        );
-      })
-    );
+        )
+      );
+    });
+
     switch (this.options.direction) {
       case DIRECTION.VERTICAL:
         this.container.style.height = toPx(lastViewSize);
