@@ -1,0 +1,35 @@
+.recycler_view_root {
+  &.vertical {
+    overflow-y: auto;
+    .recycler_view_container {
+      width: 100%;
+      .recycler_view_item {
+        width: 100%;
+      }
+    }
+  }
+  &.horizontal {
+    overflow-x: auto;
+    .recycler_view_container {
+      height: 100%;
+      .recycler_view_item {
+        height: 100%;
+      }
+    }
+  }
+
+  // border: 1px solid red;
+
+  padding: 0px;
+  margin: 0px;
+
+  .recycler_view_container {
+    position: relative;
+
+    .recycler_view_item {
+      position: absolute;
+      display: flex;
+      // border-bottom: 1px solid red;
+    }
+  }
+}
