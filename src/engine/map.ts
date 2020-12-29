@@ -1,30 +1,5 @@
-/* eslint-disable prefer-rest-params */
-/* eslint-disable @typescript-eslint/no-this-alias */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/ban-types */
-import { start } from 'repl';
 import { DEFAULT_ITEM_SIZE } from '../setting/constant';
 import { toPx } from './parser';
-
-function debounce(func: Function, wait: number, immediate: boolean) {
-  let timeout: number | null;
-  return function (this: any) {
-    const context = this;
-    const args = arguments;
-    const later = function () {
-      timeout = null;
-      if (!immediate) func.apply(context, args);
-    };
-    const callNow = immediate && !timeout;
-    if (timeout) {
-      window.clearTimeout(timeout);
-    }
-    timeout = window.setTimeout(later, wait);
-    if (callNow) func.apply(context, args);
-  };
-}
-
-export class VirtualArray<T> extends Array<T> {}
 
 export class VirtualElement<T> {
   public parent: RecyclerView<T>;
@@ -163,7 +138,6 @@ export class RecyclerView<T> {
   }
 
   onScroll(): void {
-    console.time('scroll event');
     const { scrollTop, scrollLeft } = this.root;
     const {
       height: screenHeight,
@@ -247,15 +221,12 @@ export class RecyclerView<T> {
     });
 
     this.mountedVirtualRenderer = shouldMount;
-
-    console.timeEnd('scroll event');
   }
 
   /**
    * initialize or recalculate item size
    */
   initializeSize(): void {
-    console.time('virtual dom create');
     let lastViewSize = 0;
     this.virtualDoms.push(
       ...this.options.data.map((data: T, index: number) => {
@@ -281,7 +252,6 @@ export class RecyclerView<T> {
       default:
         throw new Error('not supported direction');
     }
-    console.timeEnd('virtual dom create');
   }
 
   /**
@@ -303,7 +273,6 @@ export class RecyclerView<T> {
    * @param data
    */
   getLayout(data: T, index: number): HTMLElement {
-    console.log(this.layout++);
     const container = document.createElement('div');
     container.classList.add('recycler_view_item');
 

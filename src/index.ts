@@ -34,11 +34,7 @@ if (root1) {
     },
   };
 
-  console.log(rowNumberToCreate);
-
   new RecyclerView(root1, options);
-
-  console.log(options.data.length);
 }
 
 const root2 = document.getElementById('root2') as HTMLDivElement;
@@ -66,9 +62,8 @@ if (root2) {
     mount: (params) => {
       params.element.innerHTML = params.index.toString();
       return true;
-    }
+    },
   };
 
   new RecyclerView(root2, options);
-  console.log(options.data.length);
 }
