@@ -267,7 +267,6 @@ export class RecyclerView<T> {
   }
 
   createReusable(virtualElement: VirtualElement<T>): Reusable<T> {
-    console.log('create');
     const container = document.createElement('div');
     container.classList.add('recycler_view_item');
     const renderer = new this.options.renderer();

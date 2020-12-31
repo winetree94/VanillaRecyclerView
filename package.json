@@ -1,6 +1,6 @@
 {
   "name": "vanilla-recycler-view",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "virtual dom library for web browser",
   "main": "build/index.js",
   "types": "build/index.d.ts",

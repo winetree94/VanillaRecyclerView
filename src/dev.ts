@@ -39,7 +39,6 @@ if (root1) {
       initialize(params: LayoutParams<D>) {
         this.layout = document.createElement('div');
         this.layout.innerHTML = `${params.index}`;
-        console.log('initialize');
       }
 
       getLayout() {
@@ -86,7 +85,6 @@ if (root2) {
       initialize(params: LayoutParams<D>) {
         this.layout = document.createElement('div');
         this.layout.innerHTML = `${params.index}`;
-        console.log('initialize');
       }
 
       getLayout() {
