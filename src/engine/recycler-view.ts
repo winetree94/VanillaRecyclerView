@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
 import { DEFAULT_ITEM_SIZE } from '../setting';
 import { toPx, VirtualElement } from './';
 
@@ -31,14 +33,41 @@ export interface UnmountParams<T> {
   element: HTMLElement;
 }
 
+export interface Renderer<T> {
+  layout: (params: LayoutParams<T>) => HTMLElement | string;
+  mount?: (params: MountParams<T>) => boolean;
+  unmount?: (params: UnmountParams<T>) => void;
+}
+
+export interface ClassRenderer<T> {
+  new (): Renderer<T>;
+}
+
+export type FunctionRenderer<T> = (
+  params: LayoutParams<T>
+) => HTMLElement | string;
+
+export type RendererType<T> = ClassRenderer<T> | FunctionRenderer<T>;
+
+export function isClassRenderer<T>(
+  renderer: RendererType<T>
+): renderer is ClassRenderer<T> {
+  return (
+    typeof renderer === 'function' &&
+    renderer.prototype &&
+    renderer.prototype.layout
+  );
+}
+
 export interface RecyclerViewOptions<T> {
   data: T[];
   direction?: DIRECTION;
   preload?: number;
   size?: ((params: RowHeightParams<T>) => number) | number;
-  layout: (params: LayoutParams<T>) => HTMLElement | string;
+  layout: FunctionRenderer<T>;
   mount?: (params: MountParams<T>) => boolean;
   unmount?: (params: UnmountParams<T>) => void;
+  renderer?: RendererType<T>;
 }
 
 export class RecyclerView<T> {
@@ -146,9 +175,7 @@ export class RecyclerView<T> {
           element: unmountedElement,
         });
       }
-      if (!this.options.mount) {
-        unmountedElement.parentElement?.removeChild(unmountedElement);
-      }
+      unmountedElement.parentElement?.removeChild(unmountedElement);
       this.reusableDoms.push(unmountedElement);
     });
 
@@ -164,6 +191,7 @@ export class RecyclerView<T> {
         });
         if (refreshed) {
           virtualDom.mount(reusableDom);
+          this.container.append(reusableDom);
         } else {
           const layout = this.getLayout(virtualDom.data, virtualDom.index);
           virtualDom.mount(layout);

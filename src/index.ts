@@ -27,9 +27,7 @@ if (root1) {
     size: (params) => (params.data.a ? params.data.a * 100 : 100),
     layout: (params) => {
       const element = document.createElement('div');
-      element.innerHTML = `
-        <input type="text" value=${params.data.someValue} >
-      `;
+      element.innerHTML = `${params.index}<input type="text" value=${params.data.someValue} >`;
       const input = element.querySelector('input') as HTMLInputElement;
       input.addEventListener('input', (e: Event) => {
         params.data.someValue = (<HTMLInputElement>e.target).value;
