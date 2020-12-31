@@ -47,8 +47,8 @@ export class VirtualElement<T> {
     if (renderer && wrapperElement) {
       this.renderer = null;
       this.wrapperElement = null;
-      if (renderer.unmount) {
-        renderer.unmount({
+      if (renderer.onUnmount) {
+        renderer.onUnmount({
           api: this.parent,
           data: this.data,
           index: this.index,

@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
-import { DEFAULT_ITEM_SIZE } from '../setting';
+import '../modules/zoom-listener';
 import { toPx, VirtualElement } from './';
+export const DEFAULT_ITEM_SIZE = 50;
 
 export enum DIRECTION {
   VERTICAL = 'vertical',
@@ -39,8 +40,8 @@ export interface UnmountParams<T> {
 export interface RecyclerViewRenderer<T> {
   initialize: (params: LayoutParams<T>) => void;
   getLayout: () => HTMLElement;
-  mount?: (params: MountParams<T>) => boolean;
-  unmount?: (params: UnmountParams<T>) => void;
+  onMount?: (params: MountParams<T>) => boolean;
+  onUnmount?: (params: UnmountParams<T>) => void;
 }
 
 export interface ClassRenderer<T> {
@@ -64,9 +65,6 @@ export interface RecyclerViewOptions<T> {
   direction?: DIRECTION;
   preload?: number;
   size?: ((params: RowHeightParams<T>) => number) | number;
-  // layout: FunctionRenderer<T>;
-  // mount?: (params: MountParams<T>) => boolean;
-  // unmount?: (params: UnmountParams<T>) => void;
   renderer: RendererType<T>;
 }
 
@@ -102,22 +100,17 @@ export class RecyclerView<T> {
       this.root.classList.add(DIRECTION.HORIZONTAL);
     }
 
-    /* 기본 미리로딩 개수 지정 */
     if (!this.options.preload) {
       this.options.preload = DEFAULT_ITEM_SIZE;
     }
 
-    /* 맵을 담을 dom 생성 */
     this.container = document.createElement('div');
     this.container.classList.add('recycler_view_container');
 
-    /* 스크롤 영역을 생성한다 */
     this.initializeSize();
 
-    /* 화면에 표시 */
     this.root.append(this.container);
 
-    /* 이벤트 활성화 */
     this.root.addEventListener('scroll', this.onScroll.bind(this));
     document.body.addEventListener('zoom', this.onScroll.bind(this));
     this.root.dispatchEvent(new Event('scroll'));
@@ -173,8 +166,8 @@ export class RecyclerView<T> {
 
     toMount.forEach((virtualDom) => {
       const reusable = this.getNextReusable();
-      if (reusable && reusable.renderer.mount) {
-        const refreshed = reusable.renderer.mount({
+      if (reusable && reusable.renderer.onMount) {
+        const refreshed = reusable.renderer.onMount({
           api: this,
           data: virtualDom.data,
           index: virtualDom.index,

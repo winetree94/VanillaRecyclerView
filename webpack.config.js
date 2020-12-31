@@ -2,9 +2,12 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const path = require('path');
 
+const prod = process.env.NODE_ENV === 'production';
+console.log(prod);
+
 module.exports = {
   mode: 'development',
-  entry: './src/index.ts',
+  entry: prod ? './src/entry.ts' : './src/dev.ts',
   devtool: 'inline-source-map',
   module: {
     rules: [
@@ -25,13 +28,18 @@ module.exports = {
     port: 9009,
   },
   plugins: [
-    new MiniCssExtractPlugin(),
+    new MiniCssExtractPlugin({
+      filename: 'vanilla-recycler-view.min.css'
+    }),
     new HtmlWebpackPlugin({
       inject: 'body',
       template: 'public/index.html',
     }),
   ],
   output: {
-    path: path.resolve(__dirname, 'docs'),
+    library: 'VanillaRecyclerView',
+    libraryTarget: 'umd',
+    path: path.resolve(__dirname, './dist'),
+    filename: 'vanilla-recycler-view.min.js'
   },
 };
