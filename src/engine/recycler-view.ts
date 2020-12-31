@@ -8,6 +8,11 @@ export enum DIRECTION {
   HORIZONTAL = 'horizontal',
 }
 
+export interface Reusable<T> {
+  wrapperElement: HTMLElement;
+  renderer: RecyclerViewRenderer<T>;
+}
+
 export interface RowHeightParams<T> {
   api: RecyclerView<T>;
   data: T;
@@ -23,31 +28,26 @@ export interface MountParams<T> {
   api: RecyclerView<T>;
   data: T;
   index: number;
-  element: HTMLElement;
 }
 
 export interface UnmountParams<T> {
   api: RecyclerView<T>;
   data: T;
   index: number;
-  element: HTMLElement;
 }
 
-export interface Renderer<T> {
-  layout: (params: LayoutParams<T>) => HTMLElement | string;
+export interface RecyclerViewRenderer<T> {
+  initialize: (params: LayoutParams<T>) => void;
+  getLayout: () => HTMLElement;
   mount?: (params: MountParams<T>) => boolean;
   unmount?: (params: UnmountParams<T>) => void;
 }
 
 export interface ClassRenderer<T> {
-  new (): Renderer<T>;
+  new (): RecyclerViewRenderer<T>;
 }
 
-export type FunctionRenderer<T> = (
-  params: LayoutParams<T>
-) => HTMLElement | string;
-
-export type RendererType<T> = ClassRenderer<T> | FunctionRenderer<T>;
+export type RendererType<T> = ClassRenderer<T>;
 
 export function isClassRenderer<T>(
   renderer: RendererType<T>
@@ -64,10 +64,10 @@ export interface RecyclerViewOptions<T> {
   direction?: DIRECTION;
   preload?: number;
   size?: ((params: RowHeightParams<T>) => number) | number;
-  layout: FunctionRenderer<T>;
-  mount?: (params: MountParams<T>) => boolean;
-  unmount?: (params: UnmountParams<T>) => void;
-  renderer?: RendererType<T>;
+  // layout: FunctionRenderer<T>;
+  // mount?: (params: MountParams<T>) => boolean;
+  // unmount?: (params: UnmountParams<T>) => void;
+  renderer: RendererType<T>;
 }
 
 export class RecyclerView<T> {
@@ -77,11 +77,12 @@ export class RecyclerView<T> {
 
   /* options */
   public options: RecyclerViewOptions<T>;
-  public layout = 0;
 
   public virtualDoms: VirtualElement<T>[] = [];
-  public mountedVirtualRenderer: VirtualElement<T>[] = [];
+  public mountedVirtualElements: VirtualElement<T>[] = [];
   public reusableDoms: HTMLElement[] = [];
+
+  public reusables: Reusable<T>[] = [];
 
   constructor(parent: HTMLDivElement, options: RecyclerViewOptions<T>) {
     /* 기초 데이터 등록 */
@@ -155,10 +156,10 @@ export class RecyclerView<T> {
     });
 
     const toMount = shouldMount.filter(
-      (virtualDom) => !this.mountedVirtualRenderer.includes(virtualDom)
+      (virtualDom) => !this.mountedVirtualElements.includes(virtualDom)
     );
 
-    const toUnmount = this.mountedVirtualRenderer.filter(
+    const toUnmount = this.mountedVirtualElements.filter(
       (virtualDom) => !shouldMount.includes(virtualDom)
     );
 
@@ -166,45 +167,52 @@ export class RecyclerView<T> {
      * unmount
      */
     toUnmount.forEach((virtualDom) => {
-      const unmountedElement = virtualDom.unmount();
-      if (this.options.unmount) {
-        this.options.unmount({
-          api: this,
-          data: virtualDom.data,
-          index: virtualDom.index,
-          element: unmountedElement,
-        });
-      }
-      unmountedElement.parentElement?.removeChild(unmountedElement);
-      this.reusableDoms.push(unmountedElement);
+      const reusable = virtualDom.unmountRenderer();
+      this.reusables.push(reusable);
     });
 
     toMount.forEach((virtualDom) => {
-      const reusableDom = this.getNextRecyclableDom();
-
-      if (reusableDom && this.options.mount) {
-        const refreshed = this.options.mount({
+      const reusable = this.getNextReusable();
+      if (reusable && reusable.renderer.mount) {
+        const refreshed = reusable.renderer.mount({
           api: this,
           data: virtualDom.data,
           index: virtualDom.index,
-          element: reusableDom,
         });
         if (refreshed) {
-          virtualDom.mount(reusableDom);
-          this.container.append(reusableDom);
+          virtualDom.mountRenderer(reusable.wrapperElement, reusable.renderer);
         } else {
-          const layout = this.getLayout(virtualDom.data, virtualDom.index);
-          virtualDom.mount(layout);
-          this.container.append(layout);
+          reusable.wrapperElement.parentElement?.removeChild(
+            reusable.wrapperElement
+          );
+          const createdReusable = this.createReusable(virtualDom);
+          virtualDom.mountRenderer(
+            createdReusable.wrapperElement,
+            createdReusable.renderer
+          );
+          this.container.append(createdReusable.wrapperElement);
         }
+      } else if (reusable) {
+        reusable.wrapperElement.parentElement?.removeChild(
+          reusable.wrapperElement
+        );
+        const createdReusable = this.createReusable(virtualDom);
+        virtualDom.mountRenderer(
+          createdReusable.wrapperElement,
+          createdReusable.renderer
+        );
+        this.container.append(createdReusable.wrapperElement);
       } else {
-        const layout = this.getLayout(virtualDom.data, virtualDom.index);
-        virtualDom.mount(layout);
-        this.container.append(layout);
+        const createdReusable = this.createReusable(virtualDom);
+        virtualDom.mountRenderer(
+          createdReusable.wrapperElement,
+          createdReusable.renderer
+        );
+        this.container.append(createdReusable.wrapperElement);
       }
     });
 
-    this.mountedVirtualRenderer = shouldMount;
+    this.mountedVirtualElements = shouldMount;
   }
 
   /**
@@ -255,29 +263,6 @@ export class RecyclerView<T> {
   }
 
   /**
-   * parse layout option
-   * @param data
-   */
-  getLayout(data: T, index: number): HTMLElement {
-    const container = document.createElement('div');
-    container.classList.add('recycler_view_item');
-
-    const element = this.options.layout({
-      api: this,
-      data: data,
-      index: index,
-    });
-
-    if (element instanceof Node) {
-      container.append(element);
-    } else {
-      container.innerHTML = element;
-    }
-
-    return container;
-  }
-
-  /**
    * get unused renderer
    */
   getNextRecyclableDom(): HTMLElement | null {
@@ -286,5 +271,41 @@ export class RecyclerView<T> {
     } else {
       return null;
     }
+  }
+
+  createReusable(virtualElement: VirtualElement<T>): Reusable<T> {
+    console.log('create');
+    const container = document.createElement('div');
+    container.classList.add('recycler_view_item');
+    const renderer = new this.options.renderer();
+
+    renderer.initialize({
+      api: this,
+      data: virtualElement.data,
+      index: virtualElement.index,
+    });
+
+    const element = renderer.getLayout();
+    container.append(element);
+
+    return {
+      wrapperElement: container,
+      renderer: renderer,
+    };
+  }
+
+  getNextReusable(): Reusable<T> | null {
+    if (this.reusables) {
+      return this.reusables.splice(0, 1)[0];
+    } else {
+      return null;
+    }
+  }
+
+  clearReusables(): void {
+    this.reusables.forEach(({ wrapperElement }) => {
+      wrapperElement.parentElement?.removeChild(wrapperElement);
+    });
+    this.reusables = [];
   }
 }

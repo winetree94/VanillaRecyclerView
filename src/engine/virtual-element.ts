@@ -1,12 +1,15 @@
-import { toPx, DIRECTION, RecyclerView } from './';
+import { toPx, DIRECTION, RecyclerView, Reusable } from './';
+import { RecyclerViewRenderer } from './recycler-view';
 
 export class VirtualElement<T> {
   public parent: RecyclerView<T>;
   public index: number;
   public startSize: number;
   public endSize: number;
-  public element: HTMLElement | null = null;
   public data: T;
+
+  public wrapperElement: HTMLElement | null = null;
+  public renderer: RecyclerViewRenderer<T> | null = null;
 
   constructor(
     parent: RecyclerView<T>,
@@ -22,24 +25,41 @@ export class VirtualElement<T> {
     this.data = data;
   }
 
-  mount(element: HTMLElement): void {
-    if (this.parent.options.direction === DIRECTION.VERTICAL) {
-      element.style.top = toPx(this.startSize);
-      element.style.height = toPx(this.endSize - this.startSize);
-    } else if (this.parent.options.direction === DIRECTION.HORIZONTAL) {
-      element.style.left = toPx(this.startSize);
-      element.style.width = toPx(this.endSize - this.startSize);
+  mountRenderer(element: HTMLElement, renderer: RecyclerViewRenderer<T>): void {
+    if (!this.renderer && !this.wrapperElement) {
+      if (this.parent.options.direction === DIRECTION.VERTICAL) {
+        element.style.top = toPx(this.startSize);
+        element.style.height = toPx(this.endSize - this.startSize);
+      } else if (this.parent.options.direction === DIRECTION.HORIZONTAL) {
+        element.style.left = toPx(this.startSize);
+        element.style.width = toPx(this.endSize - this.startSize);
+      }
+      this.wrapperElement = element;
+      this.renderer = renderer;
+    } else {
+      throw new Error('renderer already mounted');
     }
-    this.element = element;
   }
 
-  unmount(): HTMLElement {
-    const element = this.element;
-    this.element = null;
-    if (element) {
-      return element;
+  unmountRenderer(): Reusable<T> {
+    const renderer = this.renderer;
+    const wrapperElement = this.wrapperElement;
+    if (renderer && wrapperElement) {
+      this.renderer = null;
+      this.wrapperElement = null;
+      if (renderer.unmount) {
+        renderer.unmount({
+          api: this.parent,
+          data: this.data,
+          index: this.index,
+        });
+      }
+      return {
+        renderer: renderer,
+        wrapperElement: wrapperElement,
+      };
     } else {
-      throw new Error('element not mounted');
+      throw new Error('renderer not mounted');
     }
   }
 }

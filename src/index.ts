@@ -1,4 +1,12 @@
-import { DIRECTION, RecyclerView, RecyclerViewOptions } from './engine';
+import {
+  DIRECTION,
+  RecyclerView,
+  RecyclerViewRenderer,
+  RecyclerViewOptions,
+  LayoutParams,
+  MountParams,
+  UnmountParams,
+} from './engine';
 import './styles.scss';
 
 export interface D {
@@ -17,7 +25,7 @@ if (root1) {
   const rowNumberToCreate = 300000;
 
   const options: RecyclerViewOptions<D> = {
-    preload: 50,
+    preload: 100,
     data: Array.from(new Array(rowNumberToCreate)).map((a, index) => ({
       a: Math.random(),
       b: Math.random(),
@@ -25,23 +33,29 @@ if (root1) {
       someValue: '',
     })),
     size: (params) => (params.data.a ? params.data.a * 100 : 100),
-    layout: (params) => {
-      const element = document.createElement('div');
-      element.innerHTML = `${params.index}<input type="text" value=${params.data.someValue} >`;
-      const input = element.querySelector('input') as HTMLInputElement;
-      input.addEventListener('input', (e: Event) => {
-        params.data.someValue = (<HTMLInputElement>e.target).value;
-      });
-      return element;
-    },
-    mount: (params) => {
-      console.log('mount');
-      // const input = params.element.querySelector('input') as HTMLInputElement;
-      // input.value = params.data.someValue;
-      // input.addEventListener('input', (e: Event) => {
-      //   params.data.someValue = (<HTMLInputElement>e.target).value;
-      // });
-      return false;
+    renderer: class implements RecyclerViewRenderer<D> {
+      public layout?: HTMLElement;
+
+      initialize(params: LayoutParams<D>) {
+        this.layout = document.createElement('div');
+        this.layout.innerHTML = `${params.index}`;
+        console.log('initialize');
+      }
+
+      getLayout() {
+        return this.layout as HTMLElement;
+      }
+
+      mount(params: MountParams<D>) {
+        if (this.layout) {
+          this.layout.innerHTML = `${params.index}`;
+        }
+        return true;
+      }
+
+      unmount(params: UnmountParams<D>) {
+        return;
+      }
     },
   };
 
@@ -66,14 +80,18 @@ if (root2) {
       someValue: '',
     })),
     size: (params) => (params.data.a ? params.data.a * 100 : 100),
-    layout: (params) => {
-      return `
-        ${params.index}
-      `;
-    },
-    mount: (params) => {
-      params.element.innerHTML = params.index.toString();
-      return true;
+    renderer: class implements RecyclerViewRenderer<D> {
+      public layout?: HTMLElement;
+
+      initialize(params: LayoutParams<D>) {
+        this.layout = document.createElement('div');
+        this.layout.innerHTML = `${params.index}`;
+        console.log('initialize');
+      }
+
+      getLayout() {
+        return this.layout as HTMLElement;
+      }
     },
   };
 
