@@ -1,13 +1,14 @@
 {
   "name": "vanilla-recycler-view",
-  "version": "1.0.0",
+  "version": "1.0.3",
   "description": "virtual dom library for web browser",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "build/index.js",
+  "types": "build/index.d.ts",
   "author": "winetree94",
   "license": "MIT",
   "homepage": "https://winetree94.github.io/VanillaRecyclerView",
   "repository": "https://github.com/winetree94/VanillaRecyclerView",
+  "files": ["dist", "build"], 
   "scripts": {
     "start": "webpack serve",
     "build": "tsc && cross-env NODE_ENV=production webpack",
