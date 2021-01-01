@@ -1,4 +1,5 @@
-![CI](https://github.com/winetree94/VanillaContextMenu/workflows/CI/badge.svg?branch=master)
+![CI](https://github.com/winetree94/VanillaRecyclerView/workflows/CI/badge.svg?branch=master)
+[![GitHub license](https://img.shields.io/github/license/winetree94/VanillaRecyclerView.svg)](https://github.com/winetree94/VanillaRecyclerView/blob/master/LICENSE)
 
 # VanillaRecyclerView For WebBrowser
 
