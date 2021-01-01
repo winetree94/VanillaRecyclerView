@@ -1,108 +1,104 @@
 ![CI](https://github.com/winetree94/VanillaRecyclerView/workflows/CI/badge.svg?branch=master)
-[![GitHub license](https://img.shields.io/github/license/winetree94/VanillaRecyclerView.svg)](https://github.com/winetree94/VanillaRecyclerView/blob/master/LICENSE)
+[![GitHub license](https://img.shields.io/github/license/winetree94/VanillaRecyclerView)](https://github.com/winetree94/VanillaRecyclerView/blob/master/LICENSE)
+[![npm version](https://badge.fury.io/js/vanilla-recycler-view.svg)](https://badge.fury.io/js/vanilla-recycler-view)
 
 English | [한국어](https://github.com/winetree94/VanillaRecyclerView/blob/master/readme/readme-kr.md)
 
 # VanillaRecyclerView For WebBrowser
 
-VanillaRecyclerView 는 대용량 데이터를 효과적으로 화면에 렌더링하기 위한 웹 라이브러리 입니다.
+![Honeycam 2021-01-01 10-06-55](https://user-images.githubusercontent.com/51369962/103431777-0f542c00-4c19-11eb-8148-269f7e62a491.gif)
 
-이 라이브러리는 순수한 바닐라 자바스크립트로 만들어져 있으며, VirtualDom 과 ReusableDom 개념을 사용해 만들어져 있습니다.
+VanillaRecyclerView 는 웹에서 대량의 데이터를 효과적으로 제어하고 화면에 렌더링하기 위한 고성능 UI 라이브러리 입니다. 순수한 자바스크립트로 설계되었으며, 손쉬운 사용성을 제공합니다. 주요 지원사항은 아래와 같습니다.
 
-d
+### 가상화 DOM
+
+가로 또는 세로의 전체 스크롤 영역에서 사용자가 보고 있는 영역만을 실시간으로 렌더링합니다. 페이지의 초기 렌더링 속도를 향상시키고, 전체 퍼포먼스를 증가시킬 수 있습니다.
+
+### 재사용 DOM
+
+매 순간 새로운 DOM 을 생성하는 것이 아니라, 현재 스크롤 영역에서 벗어난 기존의 DOM 을 재사용합니다. 실시간 렌더링에 따른 스크롤 성능 저하를 최소화 할 수 있습니다.
+
 ---
 
-# Live Examples
+# 실시간 예제들
 
-- [Quickstart(Vertical)](https://stackblitz.com/edit/vanilla-recycler-view-quickstart?file=index.js)
-- [Quickstart(Horizontal)](https://stackblitz.com/edit/vanilla-recycler-view-quickstart?file=index.js)
+- [빠른 시작(세로)](https://stackblitz.com/edit/vanilla-recycler-view-quickstart?file=index.js)
+- [빠른 시작(가로)](https://stackblitz.com/edit/vanilla-recycler-view-quickstart?file=index.js)
+- [재사용 DOM 예제](https://stackblitz.com/edit/vanilla-recycler-view-reusable-example?file=index.js)
+- [타입스크립트와 함께 사용]()
 
-#### in browser
+---
+
+# 설치 방법
+
+#### 브라우저에서 사용시
 
 ```html
 <!-- using cdn -->
-<link rel="stylesheet" href="https://unpkg.com/vanilla-context@1.0.13/dist/vanilla-context.min.css">
-<script src="https://unpkg.com/vanilla-context@1.0.13/dist/vanilla-context.min.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/vanilla-recycler-view@1.0.5/dist/vanilla-recycler-view.min.css">
+<script src="https://unpkg.com/vanilla-recycler-view@1.0.5/dist/vanilla-recycler-view.min.js"></script>
 ```
 
 ```javascript
-const table = document.getElementById('table');
+const root = document.getElementById('root');
 const options = {...};
-const context = new VanillaContext(table, options);
+const recyclerView = new RecyclerView(table, options);
 ```
 
-#### in node.js
+#### 웹팩 또는 이외의 모듈 번들러와 사용 시
 
 ```typescript
-import { VanillaContext } from 'vanilla-context';
-import 'vanilla-context/dist/vanilla-context.min.css';
+import RecyclerView from 'vanilla-recycler-view';
+import 'vanilla-recycler-view/dist/vanilla-recycler-view.min.css';
 
-const table = document.getElementById('table');
+const root = document.getElementById('root');
 const options = {...};
-const context = new VanillaContext(table, options);
+const recyclerView = new RecyclerView(table, options);
 ```
 
 ---
 
-### Option interface
+# API 문서
+
+#### 옵션
 
 ```typescript
-interface VanillaContextOptions {
-  debug?: boolean;
-  autoClose?: boolean;
-  nodes: ContextNode[] | ((e: Event) => ContextNode[]);
-}
-```
-
-### ContextNode Interface
-
-```typescript
-interface ContextNode {
-  renderer: Renderer;
-  onClick: (params: ContextNodeEventParams) => void;
-  children?: ContextNode[];
-  disabled?: boolean | ((params: ContextDisabledParams) => boolean);
-  height?: number | ((params: ContextHeightParams) => number);
-}
-```
-
-### ContextNode callback parameter interfaces
-
-click event callback function parameters interface
-```typescript
-export interface ContextNodeEventParams {
-  api: VanillaContext;
-  event: Event;
-  originEvent: Event;
-}
-```
-
-disabled callback function parameters interface
-```typescript
-export interface ContextDisabledParams {
-  api: VanillaContext;
-  originEvent: Event;
-}
-```
-
-height callback function parameters interface
-```typescript
-export interface ContextHeightParams {
-  api: VanillaContext;
-  originEvent: Event;
-}
-```
-
-# Renderer
-
-you can use any type of renderer. string, function and class will works well
-
-### Renderer Interface
-
-```typescript
-interface RendererInterface {
-  init: (params: RendererParams) => void;
-  getLayout: () => Node;
-  destroy: () => void;
+export interface RecyclerViewOptions<T> {
+  /*
+   * 선택사항
+   *
+   * 스크롤의 방향을 지정합니다.
+   * 정의하지 않으면 가로 모드로 동작합니다.
+   */
+  direction?: DIRECTION;
+  /*
+   * 선택사항
+   *
+   * 상하 또는 좌우로 미리 렌더링할 영역을 픽셀단위로 지정할 수 있습니다.
+   * 스크롤 시 깜빡임이 발생할 경우 이 값을 늘려 해결할 수 있습니다.
+   * 정의하지 않으면 50px로 동작합니다.
+   */
+  preload?: number;
+  /*
+   * 선택사항
+   *
+   * 가상화 방식의 한계로 인해, 요소별 높이 또는 너비를 절대값으로 지정해야 합니다.
+   * 숫자 또는 함수 형태로 동적 사이즈를 할당할 수 있습니다.
+   * 정의하지 않으면 50px로 동작합니다.
+   */
+  size?: ((params: RowHeightParams<T>) => number) | number;
+  /**
+   * 필수사항
+   * 
+   * 렌더링해야할 데이터 리스트입니다.
+   */
+  data: T[];
+  /*
+   * 필수사항
+   *
+   * 실제 렌더링에 사용할 생성자 함수입니다.
+   * 아래에서 설명합니다.
+   */
+  renderer: RendererType<T>;
 }
 ```
