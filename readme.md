@@ -37,8 +37,8 @@ VanillaRecyclerView 는 웹에서 대량의 데이터를 효과적으로 제어�
 CDN 을 통해 설치없이 html 에 직접 import 할 수 있습니다.
 
 ```html
-<link rel="stylesheet" href="https://unpkg.com/vanilla-recycler-view@1.0.8/dist/vanilla-recycler-view.min.css">
-<script src="https://unpkg.com/vanilla-recycler-view@1.0.8/dist/vanilla-recycler-view.min.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/vanilla-recycler-view@latest/dist/vanilla-recycler-view.min.css">
+<script src="https://unpkg.com/vanilla-recycler-view@latest/dist/vanilla-recycler-view.min.js"></script>
 ```
 
 ```javascript
