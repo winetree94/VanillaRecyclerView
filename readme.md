@@ -34,8 +34,9 @@ VanillaRecyclerView 는 웹에서 대량의 데이터를 효과적으로 제어�
 
 #### 브라우저에서 사용시
 
+CDN 을 통해 설치없이 html 에 직접 import 할 수 있습니다.
+
 ```html
-<!-- using cdn -->
 <link rel="stylesheet" href="https://unpkg.com/vanilla-recycler-view@1.0.5/dist/vanilla-recycler-view.min.css">
 <script src="https://unpkg.com/vanilla-recycler-view@1.0.5/dist/vanilla-recycler-view.min.js"></script>
 ```
@@ -47,6 +48,12 @@ const recyclerView = new RecyclerView(table, options);
 ```
 
 #### 웹팩 또는 이외의 모듈 번들러와 사용 시
+
+npm 을 통한 패키지를 제공합니다.
+
+```bash
+$ npm i vanilla-recycler-view
+```
 
 ```typescript
 import RecyclerView from 'vanilla-recycler-view';
