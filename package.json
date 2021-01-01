@@ -1,6 +1,6 @@
 {
   "name": "vanilla-recycler-view",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "virtual dom library for web browser",
   "main": "build/index.js",
   "types": "build/index.d.ts",
@@ -8,7 +8,10 @@
   "license": "MIT",
   "homepage": "https://winetree94.github.io/VanillaRecyclerView",
   "repository": "https://github.com/winetree94/VanillaRecyclerView",
-  "files": ["dist", "build"], 
+  "files": [
+    "dist",
+    "build"
+  ],
   "scripts": {
     "start": "webpack serve",
     "build": "tsc && cross-env NODE_ENV=production webpack",
@@ -21,6 +24,7 @@
     "@typescript-eslint/parser": "^4.9.0",
     "cross-env": "^7.0.3",
     "css-loader": "^5.0.1",
+    "css-minimizer-webpack-plugin": "^1.1.5",
     "eslint": "^7.14.0",
     "eslint-config-prettier": "^6.15.0",
     "eslint-loader": "^4.0.2",
