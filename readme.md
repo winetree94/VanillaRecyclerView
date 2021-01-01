@@ -61,7 +61,7 @@ const recyclerView = new RecyclerView(table, options);
 
 # API 문서
 
-#### 옵션 인터페이스
+## 1. 옵션
 
 ```typescript
 export interface RecyclerViewOptions<T> {
@@ -104,7 +104,7 @@ export interface RecyclerViewOptions<T> {
 }
 ```
 
-#### 렌더러 라이프사이클
+## 2. 렌더러
 
 ```typescript
 export interface RecyclerViewRenderer<T> {
@@ -127,17 +127,16 @@ export interface RecyclerViewRenderer<T> {
    * 선택항목, 하지만 권장됩니다.
    *
    * DOM이 재사용되기 직전에 호출되는 함수입니다.
-   * RecyclerView 는 기본적으로 가상화 DOM 방식으로만 동작하며, 이 함수가 구현되었을 경우에만 재사용 DOM 기능을 활성화합니다.
-   * 이전에 initialize 에서 생성한 DOM 의 값을 재할당하고,
-   * 새로운 이벤트를 할당해야 합니다.
+   * RecyclerView 는 기본적으로 가상화 DOM 방식으로만 동작하며 이 함수가 구현되었을 경우에만 재사용 DOM 기능을 활성화합니다.
+   * 기존에 생성한 DOM 의 값을 재할당하고, 새로운 이벤트를 바인딩해야 합니다.
    */
   onMount?: (params: MountParams<T>) => boolean;
   /*
    * 선택항목
    * 
    * 기존 DOM 이 스크롤 영역에서 벗어날 때 호출됩니다.
-   * onMount 에서 새로운 이벤트를 할당하는 경우
-   * 이 함수에서 기존의 이벤트를 해제해야 합니다.
+   * 재사용할 DOM은 기존의 이벤트 리스너들이 유지되므로,
+   * 반드시 이 함수에서 기존의 이벤트를 해제해야 합니다.
    */
   onUnmount?: (params: UnmountParams<T>) => void;
 }
