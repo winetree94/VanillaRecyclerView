@@ -49,7 +49,7 @@ export interface RendererConstructor<T> {
 }
 
 export interface RecyclerViewOptions<T> {
-  data?: T[];
+  data: T[];
   direction?: DIRECTION;
   preload?: number;
   size?: ((params: SizeParams<T>) => number) | number;
@@ -116,9 +116,7 @@ export class RecyclerView<T> {
     this.container.classList.add('recycler_view_container');
 
     /* create virtual element per data */
-    if (options.data) {
-      this.setData(options.data);
-    }
+    this.setData(options.data);
 
     /* append element */
     this.root.append(this.container);
@@ -296,43 +294,10 @@ export class RecyclerView<T> {
     }
   }
 
-  public setData(data: T[]): void {
+  private setData(data: T[]): void {
     this.virtualElements = data.map(
       (data) => new VirtualElement<T>(this, data)
     );
-    this.calcalateSize();
-    this.onScroll();
-  }
-
-  public insert(index: number, data: T[]): void {
-    const prefix = this.virtualElements.slice(0, index);
-    const surfix = this.virtualElements.slice(index);
-    this.virtualElements = [
-      ...prefix,
-      ...data.map((data) => new VirtualElement(this, data)),
-      ...surfix,
-    ];
-    this.calcalateSize();
-    this.onScroll();
-  }
-
-  public remove(index: number): void {
-    const removed = this.virtualElements.splice(index, 1);
-    if (removed) {
-      removed.forEach((virtualElement) => {
-        if (virtualElement.isMounted()) {
-          const reusable = virtualElement.unmountRenderer();
-          this.reusables.push(reusable);
-          reusable.wrapperElement.parentElement?.removeChild(
-            reusable.wrapperElement
-          );
-          const index = this.mountedVirtualElements.indexOf(virtualElement);
-          if (index !== -1) {
-            this.mountedVirtualElements.splice(index, 1);
-          }
-        }
-      });
-    }
     this.calcalateSize();
     this.onScroll();
   }
