@@ -26,6 +26,7 @@ VanillaRecyclerView 는 웹에서 대량의 데이터를 효과적으로 제어�
 - [빠른 시작(가로)](https://stackblitz.com/edit/vanilla-recycler-view-quickstart?file=index.js)
 - [재사용 DOM 예제](https://stackblitz.com/edit/vanilla-recycler-view-reusable-example?file=index.js)
 - [타입스크립트와 함께 사용]()
+- [복잡한 레이아웃 구현]()
 
 ---
 
@@ -60,7 +61,7 @@ const recyclerView = new RecyclerView(table, options);
 
 # API 문서
 
-#### 옵션
+#### 옵션 인터페이스
 
 ```typescript
 export interface RecyclerViewOptions<T> {
@@ -96,9 +97,48 @@ export interface RecyclerViewOptions<T> {
   /*
    * 필수사항
    *
-   * 실제 렌더링에 사용할 생성자 함수입니다.
+   * 렌더링에 사용할 생성자 함수 또는 클래스를 제공해야 합니다.
    * 아래에서 설명합니다.
    */
   renderer: RendererType<T>;
+}
+```
+
+#### 렌더러 라이프사이클
+
+```typescript
+export interface RecyclerViewRenderer<T> {
+  /*
+   * 필수항목
+   *
+   * 렌더러가 생성될 때 호출됩니다.
+   * 여기에서 최초로 DOM을 생성하고 이벤트를 할당합니다.
+   * 생성된 DOM은 인스턴스 내부에 할당해서 getLayout 함수를 통해 반환해야 합니다.
+   */
+  initialize: (params: LayoutParams<T>) => void;
+  /*
+   * 필수항목
+   *
+   * RecyclerView 가 내부적으로 DOM 을 꺼내는 엔드포인트 함수입니다.
+   * 반드시 initialize 함수를 통해 생성된 DOM 을 반환해야합니다. 
+   */
+  getLayout: () => HTMLElement;
+  /*
+   * 선택항목, 하지만 권장됩니다.
+   *
+   * DOM이 재사용되기 직전에 호출되는 함수입니다.
+   * RecyclerView 는 기본적으로 가상화 DOM 방식으로만 동작하며, 이 함수가 구현되었을 경우에만 재사용 DOM 기능을 활성화합니다.
+   * 이전에 initialize 에서 생성한 DOM 의 값을 재할당하고,
+   * 새로운 이벤트를 할당해야 합니다.
+   */
+  onMount?: (params: MountParams<T>) => boolean;
+  /*
+   * 선택항목
+   * 
+   * 기존 DOM 이 스크롤 영역에서 벗어날 때 호출됩니다.
+   * onMount 에서 새로운 이벤트를 할당하는 경우
+   * 이 함수에서 기존의 이벤트를 해제해야 합니다.
+   */
+  onUnmount?: (params: UnmountParams<T>) => void;
 }
 ```
