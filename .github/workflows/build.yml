@@ -1,11 +1,9 @@
 name: CI
 on:
   push:
-    tags:
-      - 'v*'
+    branches: [ master ]
   pull_request:
-    tags:
-      - 'v*'
+    branches: [ master ]
 jobs:
   build:
     runs-on: ubuntu-20.04
@@ -25,22 +23,6 @@ jobs:
     - name: build
       run: |
         npm run build
-
-    # Github Release
-    - name: Create Release
-      id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
-      with:
-        tag_name: ${{ github.ref }}
-        release_name: Release ${{ github.ref }}
-        body: |
-          Changes in this Release
-          - First Change
-          - Second Change
-        draft: false
-        prerelease: false
 
     # Npm Publish
     - uses: JS-DevTools/npm-publish@v1
