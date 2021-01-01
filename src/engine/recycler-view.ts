@@ -11,33 +11,33 @@ export enum DIRECTION {
 
 export interface Reusable<T> {
   wrapperElement: HTMLElement;
-  renderer: RecyclerViewRenderer<T>;
+  renderer: VanillaRecyclerViewRenderer<T>;
 }
 
 export interface SizeParams<T> {
-  api: RecyclerView<T>;
+  api: VanillaRecyclerView<T>;
   data: T;
 }
 
 export interface InitializeParams<T> {
-  api: RecyclerView<T>;
+  api: VanillaRecyclerView<T>;
   data: T;
   index: number;
 }
 
 export interface MountParams<T> {
-  api: RecyclerView<T>;
+  api: VanillaRecyclerView<T>;
   data: T;
   index: number;
 }
 
 export interface UnmountParams<T> {
-  api: RecyclerView<T>;
+  api: VanillaRecyclerView<T>;
   data: T;
   index: number;
 }
 
-export interface RecyclerViewRenderer<T> {
+export interface VanillaRecyclerViewRenderer<T> {
   initialize: (params: InitializeParams<T>) => void;
   getLayout: () => HTMLElement;
   onMount?: (params: MountParams<T>) => boolean;
@@ -45,10 +45,10 @@ export interface RecyclerViewRenderer<T> {
 }
 
 export interface RendererConstructor<T> {
-  new (): RecyclerViewRenderer<T>;
+  new (): VanillaRecyclerViewRenderer<T>;
 }
 
-export interface RecyclerViewOptions<T> {
+export interface VanillaRecyclerViewOptions<T> {
   data: T[];
   direction?: DIRECTION;
   preload?: number;
@@ -56,7 +56,7 @@ export interface RecyclerViewOptions<T> {
   renderer: RendererConstructor<T>;
 }
 
-export class RecyclerView<T> {
+export class VanillaRecyclerView<T> {
   /* constants */
   private root: HTMLDivElement;
 
@@ -75,7 +75,10 @@ export class RecyclerView<T> {
   /* unmounted, reusable elements */
   private reusables: Reusable<T>[] = [];
 
-  public constructor(root: HTMLDivElement, options: RecyclerViewOptions<T>) {
+  public constructor(
+    root: HTMLDivElement,
+    options: VanillaRecyclerViewOptions<T>
+  ) {
     /* allocate arguments */
     this.root = root;
 

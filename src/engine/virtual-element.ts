@@ -1,17 +1,17 @@
-import { toPx, DIRECTION, RecyclerView, Reusable } from './';
-import { RecyclerViewRenderer } from './recycler-view';
+import { toPx, DIRECTION, VanillaRecyclerView, Reusable } from './';
+import { VanillaRecyclerViewRenderer } from './recycler-view';
 
 export class VirtualElement<T> {
-  public parent: RecyclerView<T>;
+  public parent: VanillaRecyclerView<T>;
   public index = 0;
   public start = 0;
   public size = 0;
   public data: T;
 
   public wrapperElement: HTMLElement | null = null;
-  public renderer: RecyclerViewRenderer<T> | null = null;
+  public renderer: VanillaRecyclerViewRenderer<T> | null = null;
 
-  constructor(parent: RecyclerView<T>, data: T) {
+  constructor(parent: VanillaRecyclerView<T>, data: T) {
     this.parent = parent;
     this.data = data;
   }
@@ -46,7 +46,7 @@ export class VirtualElement<T> {
   mountRenderer(
     direction: DIRECTION,
     element: HTMLElement,
-    renderer: RecyclerViewRenderer<T>
+    renderer: VanillaRecyclerViewRenderer<T>
   ): void {
     if (!this.renderer && !this.wrapperElement) {
       if (direction === DIRECTION.VERTICAL) {

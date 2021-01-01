@@ -1,3 +1,3 @@
 import './styles.scss';
-import { RecyclerView } from './engine/recycler-view';
-export = RecyclerView;
+import { VanillaRecyclerView } from './engine/recycler-view';
+export = VanillaRecyclerView;

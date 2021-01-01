@@ -1,3 +1,3 @@
-import { RecyclerView } from './engine';
+import { VanillaRecyclerView } from './engine';
 export * from './engine';
-export default RecyclerView;
+export default VanillaRecyclerView;

@@ -44,7 +44,7 @@ CDN 을 통해 설치없이 html 에 직접 import 할 수 있습니다.
 ```javascript
 const root = document.getElementById('root');
 const options = {...};
-const recyclerView = new RecyclerView(table, options);
+const recyclerView = new VanillaRecyclerView(table, options);
 ```
 
 #### 웹팩 또는 이외의 모듈 번들러와 사용 시
@@ -56,12 +56,12 @@ $ npm i vanilla-recycler-view
 ```
 
 ```typescript
-import RecyclerView from 'vanilla-recycler-view';
+import VanillaRecyclerView from 'vanilla-recycler-view';
 import 'vanilla-recycler-view/dist/vanilla-recycler-view.min.css';
 
 const root = document.getElementById('root');
 const options = {...};
-const recyclerView = new RecyclerView(root, options);
+const recyclerView = new VanillaRecyclerView(root, options);
 ```
 
 ---
@@ -71,7 +71,7 @@ const recyclerView = new RecyclerView(root, options);
 ## 1. 옵션
 
 ```typescript
-export interface RecyclerViewOptions<T> {
+export interface VanillaRecyclerViewOptions<T> {
   /*
    * 선택사항
    *
@@ -107,14 +107,14 @@ export interface RecyclerViewOptions<T> {
    * 렌더링에 사용할 생성자 함수 또는 클래스를 제공해야 합니다.
    * 아래에서 설명합니다.
    */
-  renderer: RendererType<T>;
+  renderer: VanillaRecyclerViewRenderer<T>;
 }
 ```
 
 ## 2. 렌더러
 
 ```typescript
-export interface RecyclerViewRenderer<T> {
+export interface VanillaRecyclerViewRenderer<T> {
   /*
    * 필수항목
    *

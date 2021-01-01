@@ -1,8 +1,8 @@
 import {
   DIRECTION,
-  RecyclerView,
-  RecyclerViewRenderer,
-  RecyclerViewOptions,
+  VanillaRecyclerView,
+  VanillaRecyclerViewRenderer,
+  VanillaRecyclerViewOptions,
   InitializeParams,
   MountParams,
   UnmountParams,
@@ -24,7 +24,7 @@ if (root1) {
 
   const rowNumberToCreate = 10000;
 
-  const options: RecyclerViewOptions<D> = {
+  const options: VanillaRecyclerViewOptions<D> = {
     preload: 100,
     data: Array.from(new Array(rowNumberToCreate)).map((a, index) => ({
       a: Math.random(),
@@ -33,7 +33,7 @@ if (root1) {
       someValue: '',
     })),
     size: (params) => (params.data.a ? params.data.a * 100 : 100),
-    renderer: class implements RecyclerViewRenderer<D> {
+    renderer: class implements VanillaRecyclerViewRenderer<D> {
       public layout?: HTMLElement;
 
       initialize(params: InitializeParams<D>) {
@@ -58,7 +58,7 @@ if (root1) {
     },
   };
 
-  const instance = new RecyclerView(root1, options);
+  const instance = new VanillaRecyclerView(root1, options);
 }
 
 const root2 = document.getElementById('root2') as HTMLDivElement;
@@ -69,7 +69,7 @@ if (root2) {
 
   const rowNumberToCreate = Math.floor(Math.random() * 100000);
 
-  const options: RecyclerViewOptions<D> = {
+  const options: VanillaRecyclerViewOptions<D> = {
     preload: 200,
     direction: DIRECTION.HORIZONTAL,
     data: Array.from(new Array(rowNumberToCreate)).map((a, index) => ({
@@ -79,7 +79,7 @@ if (root2) {
       someValue: '',
     })),
     size: (params) => (params.data.a ? params.data.a * 100 : 100),
-    renderer: class implements RecyclerViewRenderer<D> {
+    renderer: class implements VanillaRecyclerViewRenderer<D> {
       public layout?: HTMLElement;
 
       initialize(params: InitializeParams<D>) {
@@ -93,5 +93,5 @@ if (root2) {
     },
   };
 
-  new RecyclerView(root2, options);
+  new VanillaRecyclerView(root2, options);
 }
