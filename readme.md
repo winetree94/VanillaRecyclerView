@@ -2,7 +2,7 @@
 [![GitHub license](https://img.shields.io/github/license/winetree94/VanillaRecyclerView)](https://github.com/winetree94/VanillaRecyclerView/blob/master/LICENSE)
 [![npm version](https://badge.fury.io/js/vanilla-recycler-view.svg)](https://badge.fury.io/js/vanilla-recycler-view)
 
-English | [한국어](https://github.com/winetree94/VanillaRecyclerView/blob/master/readme/readme-kr.md)
+한국어 | [English](https://github.com/winetree94/VanillaRecyclerView/blob/master/readme/readme-en.md)
 
 # VanillaRecyclerView For WebBrowser
 
