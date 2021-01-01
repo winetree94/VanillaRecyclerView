@@ -1,6 +1,8 @@
 ![CI](https://github.com/winetree94/VanillaRecyclerView/workflows/CI/badge.svg?branch=master)
 [![GitHub license](https://img.shields.io/github/license/winetree94/VanillaRecyclerView.svg)](https://github.com/winetree94/VanillaRecyclerView/blob/master/LICENSE)
 
+English | [한국어](https://github.com/winetree94/VanillaRecyclerView/blob/master/readme/readme-kr.md)
+
 # VanillaRecyclerView For WebBrowser
 
 VanillaRecyclerView 는 대용량 데이터를 효과적으로 화면에 렌더링하기 위한 웹 라이브러리 입니다.
