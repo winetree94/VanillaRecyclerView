@@ -3,36 +3,58 @@ import { RecyclerViewRenderer } from './recycler-view';
 
 export class VirtualElement<T> {
   public parent: RecyclerView<T>;
-  public index: number;
-  public startSize: number;
-  public endSize: number;
+  public index = 0;
+  public start = 0;
+  public size = 0;
   public data: T;
 
   public wrapperElement: HTMLElement | null = null;
   public renderer: RecyclerViewRenderer<T> | null = null;
 
-  constructor(
-    parent: RecyclerView<T>,
-    index: number,
-    startSize: number,
-    endSize: number,
-    data: T
-  ) {
-    this.index = index;
-    this.startSize = startSize;
-    this.endSize = endSize;
+  constructor(parent: RecyclerView<T>, data: T) {
     this.parent = parent;
     this.data = data;
   }
 
-  mountRenderer(element: HTMLElement, renderer: RecyclerViewRenderer<T>): void {
+  public setPosition(start: number, size: number): void {
+    this.start = start;
+    this.size = size;
+  }
+
+  public setIndex(index: number): void {
+    this.index = index;
+  }
+
+  public updatePosition(direction: DIRECTION): void {
+    if (this.wrapperElement) {
+      if (direction === DIRECTION.VERTICAL) {
+        this.wrapperElement.style.top = toPx(this.start);
+        this.wrapperElement.style.height = toPx(this.size);
+      } else if (direction === DIRECTION.HORIZONTAL) {
+        this.wrapperElement.style.left = toPx(this.start);
+        this.wrapperElement.style.width = toPx(this.size);
+      }
+    } else {
+      throw new Error('element not mounted');
+    }
+  }
+
+  public isMounted(): boolean {
+    return !!this.renderer && !!this.wrapperElement;
+  }
+
+  mountRenderer(
+    direction: DIRECTION,
+    element: HTMLElement,
+    renderer: RecyclerViewRenderer<T>
+  ): void {
     if (!this.renderer && !this.wrapperElement) {
-      if (this.parent.options.direction === DIRECTION.VERTICAL) {
-        element.style.top = toPx(this.startSize);
-        element.style.height = toPx(this.endSize - this.startSize);
-      } else if (this.parent.options.direction === DIRECTION.HORIZONTAL) {
-        element.style.left = toPx(this.startSize);
-        element.style.width = toPx(this.endSize - this.startSize);
+      if (direction === DIRECTION.VERTICAL) {
+        element.style.top = toPx(this.start);
+        element.style.height = toPx(this.size);
+      } else if (direction === DIRECTION.HORIZONTAL) {
+        element.style.left = toPx(this.start);
+        element.style.width = toPx(this.size);
       }
       this.wrapperElement = element;
       this.renderer = renderer;

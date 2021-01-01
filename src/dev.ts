@@ -3,7 +3,7 @@ import {
   RecyclerView,
   RecyclerViewRenderer,
   RecyclerViewOptions,
-  LayoutParams,
+  InitializeParams,
   MountParams,
   UnmountParams,
 } from './engine';
@@ -22,7 +22,7 @@ const root1 = document.getElementById('root1') as HTMLDivElement;
 if (root1) {
   root1.style.height = '500px';
 
-  const rowNumberToCreate = 300000;
+  const rowNumberToCreate = 10;
 
   const options: RecyclerViewOptions<D> = {
     preload: 100,
@@ -36,9 +36,9 @@ if (root1) {
     renderer: class implements RecyclerViewRenderer<D> {
       public layout?: HTMLElement;
 
-      initialize(params: LayoutParams<D>) {
+      initialize(params: InitializeParams<D>) {
         this.layout = document.createElement('div');
-        this.layout.innerHTML = `${params.index}`;
+        this.layout.innerHTML = `${params.data.index}`;
       }
 
       getLayout() {
@@ -47,7 +47,7 @@ if (root1) {
 
       onMount(params: MountParams<D>) {
         if (this.layout) {
-          this.layout.innerHTML = `${params.index}`;
+          this.layout.innerHTML = `${params.data.index}`;
         }
         return true;
       }
@@ -58,7 +58,23 @@ if (root1) {
     },
   };
 
-  new RecyclerView(root1, options);
+  const instance = new RecyclerView(root1, options);
+
+  instance.insert(0, [
+    {
+      a: Math.random(),
+      b: Math.random(),
+      index: 555,
+      someValue: '',
+    },
+  ]);
+
+  instance.remove(0);
+  instance.remove(0);
+  instance.remove(0);
+  instance.remove(0);
+  instance.remove(0);
+  instance.remove(0);
 }
 
 const root2 = document.getElementById('root2') as HTMLDivElement;
@@ -82,7 +98,7 @@ if (root2) {
     renderer: class implements RecyclerViewRenderer<D> {
       public layout?: HTMLElement;
 
-      initialize(params: LayoutParams<D>) {
+      initialize(params: InitializeParams<D>) {
         this.layout = document.createElement('div');
         this.layout.innerHTML = `${params.index}`;
       }

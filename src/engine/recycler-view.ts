@@ -14,12 +14,12 @@ export interface Reusable<T> {
   renderer: RecyclerViewRenderer<T>;
 }
 
-export interface RowHeightParams<T> {
+export interface SizeParams<T> {
   api: RecyclerView<T>;
   data: T;
 }
 
-export interface LayoutParams<T> {
+export interface InitializeParams<T> {
   api: RecyclerView<T>;
   data: T;
   index: number;
@@ -38,85 +38,99 @@ export interface UnmountParams<T> {
 }
 
 export interface RecyclerViewRenderer<T> {
-  initialize: (params: LayoutParams<T>) => void;
+  initialize: (params: InitializeParams<T>) => void;
   getLayout: () => HTMLElement;
   onMount?: (params: MountParams<T>) => boolean;
   onUnmount?: (params: UnmountParams<T>) => void;
 }
 
-export interface ClassRenderer<T> {
+export interface RendererConstructor<T> {
   new (): RecyclerViewRenderer<T>;
 }
 
-export type RendererType<T> = ClassRenderer<T>;
-
-export function isClassRenderer<T>(
-  renderer: RendererType<T>
-): renderer is ClassRenderer<T> {
-  return (
-    typeof renderer === 'function' &&
-    renderer.prototype &&
-    renderer.prototype.layout
-  );
-}
-
 export interface RecyclerViewOptions<T> {
-  data: T[];
+  data?: T[];
   direction?: DIRECTION;
   preload?: number;
-  size?: ((params: RowHeightParams<T>) => number) | number;
-  renderer: RendererType<T>;
+  size?: ((params: SizeParams<T>) => number) | number;
+  renderer: RendererConstructor<T>;
 }
 
 export class RecyclerView<T> {
-  /* constant */
-  public root: HTMLDivElement;
-  public container: HTMLDivElement;
+  /* constants */
+  private root: HTMLDivElement;
 
-  /* options */
-  public options: RecyclerViewOptions<T>;
+  private _direction: DIRECTION;
+  private _preload: number;
+  private _size: ((params: SizeParams<T>) => number) | number;
+  private _renderer: RendererConstructor<T>;
 
-  public virtualDoms: VirtualElement<T>[] = [];
-  public mountedVirtualElements: VirtualElement<T>[] = [];
-  public reusableDoms: HTMLElement[] = [];
+  /* virtual scroll area element */
+  private container: HTMLDivElement;
 
-  public reusables: Reusable<T>[] = [];
+  /* all virtual elements */
+  private virtualElements: VirtualElement<T>[] = [];
+  /* current mounted virtual elements */
+  private mountedVirtualElements: VirtualElement<T>[] = [];
+  /* unmounted, reusable elements */
+  private reusables: Reusable<T>[] = [];
 
-  constructor(parent: HTMLDivElement, options: RecyclerViewOptions<T>) {
-    /* 기초 데이터 등록 */
-    this.root = parent;
-    this.options = options;
+  public constructor(root: HTMLDivElement, options: RecyclerViewOptions<T>) {
+    /* allocate arguments */
+    this.root = root;
 
-    /* 기본 방향 지정 */
-    if (!this.options.direction) {
-      this.options.direction = DIRECTION.VERTICAL;
+    /* define default direction */
+    if (options.direction) {
+      this._direction = options.direction;
+    } else {
+      this._direction = DIRECTION.VERTICAL;
     }
 
-    /* 루트 컨테이너에 클래스 반영 */
+    /* define default preload */
+    if (options.preload) {
+      this._preload = options.preload;
+    } else {
+      this._preload = DEFAULT_ITEM_SIZE;
+    }
+
+    /* define default size */
+    if (options.size) {
+      this._size = options.size;
+    } else {
+      this._size = DEFAULT_ITEM_SIZE;
+    }
+
+    /* allocate renderer */
+    this._renderer = options.renderer;
+
+    /* apply class to element */
     this.root.classList.add('recycler_view_root');
-    if (this.options.direction === DIRECTION.VERTICAL) {
+    if (this._direction === DIRECTION.VERTICAL) {
       this.root.classList.add(DIRECTION.VERTICAL);
-    } else if (this.options.direction === DIRECTION.HORIZONTAL) {
+    } else if (this._direction === DIRECTION.HORIZONTAL) {
       this.root.classList.add(DIRECTION.HORIZONTAL);
     }
 
-    if (!this.options.preload) {
-      this.options.preload = DEFAULT_ITEM_SIZE;
-    }
-
+    /* create wrapper element for scroll area */
     this.container = document.createElement('div');
     this.container.classList.add('recycler_view_container');
 
-    this.initializeSize();
+    /* create virtual element per data */
+    if (options.data) {
+      this.setData(options.data);
+    }
 
+    /* append element */
     this.root.append(this.container);
 
+    // bind scroll, zoom event
     this.root.addEventListener('scroll', this.onScroll.bind(this));
     document.body.addEventListener('zoom', this.onScroll.bind(this));
+    // emit event for first render
     this.root.dispatchEvent(new Event('scroll'));
   }
 
-  onScroll(): void {
+  private onScroll(): void {
     const { scrollTop, scrollLeft } = this.root;
     const {
       height: screenHeight,
@@ -127,37 +141,41 @@ export class RecyclerView<T> {
     let endSize = scrollTop + screenHeight;
 
     /* calculate direction */
-    switch (this.options.direction) {
+    switch (this._direction) {
       case DIRECTION.VERTICAL:
-        startSize = scrollTop - (this.options.preload || DEFAULT_ITEM_SIZE);
-        endSize =
-          scrollTop +
-          screenHeight +
-          (this.options.preload || DEFAULT_ITEM_SIZE);
+        startSize = scrollTop - this._preload;
+        endSize = scrollTop + screenHeight + this._preload;
         break;
       case DIRECTION.HORIZONTAL:
-        startSize = scrollLeft - (this.options.preload || DEFAULT_ITEM_SIZE);
-        endSize =
-          scrollLeft +
-          screenWidth +
-          (this.options.preload || DEFAULT_ITEM_SIZE);
+        startSize = scrollLeft - this._preload;
+        endSize = scrollLeft + screenWidth + this._preload;
         break;
     }
 
-    const shouldMount = this.virtualDoms.filter((virtualDom) => {
-      return virtualDom.startSize >= startSize && virtualDom.endSize <= endSize;
+    const shouldMount = this.virtualElements.filter((virtualDom) => {
+      return (
+        virtualDom.start >= startSize &&
+        virtualDom.start + virtualDom.size <= endSize
+      );
     });
 
-    const toMount = shouldMount.filter(
-      (virtualDom) => !this.mountedVirtualElements.includes(virtualDom)
-    );
+    const mounted: VirtualElement<T>[] = [];
+    const toMount: VirtualElement<T>[] = [];
+
+    shouldMount.forEach((virtualDom) => {
+      if (!this.mountedVirtualElements.includes(virtualDom)) {
+        toMount.push(virtualDom);
+      } else {
+        mounted.push(virtualDom);
+      }
+    });
 
     const toUnmount = this.mountedVirtualElements.filter(
       (virtualDom) => !shouldMount.includes(virtualDom)
     );
 
     /**
-     * unmount
+     * unmount and save reusable dom
      */
     toUnmount.forEach((virtualDom) => {
       const reusable = virtualDom.unmountRenderer();
@@ -173,13 +191,18 @@ export class RecyclerView<T> {
           index: virtualDom.index,
         });
         if (refreshed) {
-          virtualDom.mountRenderer(reusable.wrapperElement, reusable.renderer);
+          virtualDom.mountRenderer(
+            this._direction,
+            reusable.wrapperElement,
+            reusable.renderer
+          );
         } else {
           reusable.wrapperElement.parentElement?.removeChild(
             reusable.wrapperElement
           );
           const createdReusable = this.createReusable(virtualDom);
           virtualDom.mountRenderer(
+            this._direction,
             createdReusable.wrapperElement,
             createdReusable.renderer
           );
@@ -191,6 +214,7 @@ export class RecyclerView<T> {
         );
         const createdReusable = this.createReusable(virtualDom);
         virtualDom.mountRenderer(
+          this._direction,
           createdReusable.wrapperElement,
           createdReusable.renderer
         );
@@ -198,6 +222,7 @@ export class RecyclerView<T> {
       } else {
         const createdReusable = this.createReusable(virtualDom);
         virtualDom.mountRenderer(
+          this._direction,
           createdReusable.wrapperElement,
           createdReusable.renderer
         );
@@ -205,71 +230,29 @@ export class RecyclerView<T> {
       }
     });
 
-    this.mountedVirtualElements = shouldMount;
-  }
-
-  /**
-   * initialize or recalculate item size
-   */
-  initializeSize(): void {
-    let lastViewSize = 0;
-
-    this.options.data.forEach((data: T, index: number) => {
-      const currentViewSize = lastViewSize;
-      const virtualDomSize = this.getSize(data);
-      lastViewSize += virtualDomSize;
-      this.virtualDoms.push(
-        new VirtualElement<T>(
-          this,
-          index,
-          currentViewSize,
-          currentViewSize + virtualDomSize,
-          data
-        )
-      );
+    mounted.forEach((virtualDom) => {
+      virtualDom.updatePosition(this._direction);
     });
 
-    switch (this.options.direction) {
-      case DIRECTION.VERTICAL:
-        this.container.style.height = toPx(lastViewSize);
-        break;
-      case DIRECTION.HORIZONTAL:
-        this.container.style.width = toPx(lastViewSize);
-        break;
-      default:
-        throw new Error('not supported direction');
-    }
+    this.mountedVirtualElements = shouldMount;
   }
 
   /**
    * parse size option
    * @param data
    */
-  getSize(data: T): number {
-    if (!this.options.size) {
-      return DEFAULT_ITEM_SIZE;
-    } else if (typeof this.options.size === 'function') {
-      return this.options.size({ api: this, data: data });
+  private getSize(data: T): number {
+    if (typeof this._size === 'function') {
+      return this._size({ api: this, data: data });
     } else {
-      return this.options.size;
+      return this._size;
     }
   }
 
-  /**
-   * get unused renderer
-   */
-  getNextRecyclableDom(): HTMLElement | null {
-    if (this.reusableDoms.length) {
-      return this.reusableDoms.splice(0, 1)[0];
-    } else {
-      return null;
-    }
-  }
-
-  createReusable(virtualElement: VirtualElement<T>): Reusable<T> {
+  private createReusable(virtualElement: VirtualElement<T>): Reusable<T> {
     const container = document.createElement('div');
     container.classList.add('recycler_view_item');
-    const renderer = new this.options.renderer();
+    const renderer = new this._renderer();
 
     renderer.initialize({
       api: this,
@@ -286,7 +269,7 @@ export class RecyclerView<T> {
     };
   }
 
-  getNextReusable(): Reusable<T> | null {
+  private getNextReusable(): Reusable<T> | null {
     if (this.reusables) {
       return this.reusables.splice(0, 1)[0];
     } else {
@@ -294,10 +277,63 @@ export class RecyclerView<T> {
     }
   }
 
-  clearReusables(): void {
-    this.reusables.forEach(({ wrapperElement }) => {
-      wrapperElement.parentElement?.removeChild(wrapperElement);
-    });
-    this.reusables = [];
+  public calcalateSize(): void {
+    const viewSize = this.virtualElements.reduce((start, virtualDom, index) => {
+      const currentSize = this.getSize(virtualDom.data);
+      virtualDom.setIndex(index);
+      virtualDom.setPosition(start, currentSize);
+      return start + currentSize;
+    }, 0);
+    switch (this._direction) {
+      case DIRECTION.VERTICAL:
+        this.container.style.height = toPx(viewSize);
+        break;
+      case DIRECTION.HORIZONTAL:
+        this.container.style.width = toPx(viewSize);
+        break;
+      default:
+        throw new Error('not supported direction');
+    }
+  }
+
+  public setData(data: T[]): void {
+    this.virtualElements = data.map(
+      (data) => new VirtualElement<T>(this, data)
+    );
+    this.calcalateSize();
+    this.onScroll();
+  }
+
+  public insert(index: number, data: T[]): void {
+    const prefix = this.virtualElements.slice(0, index);
+    const surfix = this.virtualElements.slice(index);
+    this.virtualElements = [
+      ...prefix,
+      ...data.map((data) => new VirtualElement(this, data)),
+      ...surfix,
+    ];
+    this.calcalateSize();
+    this.onScroll();
+  }
+
+  public remove(index: number): void {
+    const removed = this.virtualElements.splice(index, 1);
+    if (removed) {
+      removed.forEach((virtualElement) => {
+        if (virtualElement.isMounted()) {
+          const reusable = virtualElement.unmountRenderer();
+          this.reusables.push(reusable);
+          reusable.wrapperElement.parentElement?.removeChild(
+            reusable.wrapperElement
+          );
+          const index = this.mountedVirtualElements.indexOf(virtualElement);
+          if (index !== -1) {
+            this.mountedVirtualElements.splice(index, 1);
+          }
+        }
+      });
+    }
+    this.calcalateSize();
+    this.onScroll();
   }
 }
