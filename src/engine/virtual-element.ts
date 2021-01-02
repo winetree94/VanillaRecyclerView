@@ -25,14 +25,17 @@ export class VirtualElement<T> {
     this.index = index;
   }
 
-  public updatePosition(direction: DIRECTION): void {
+  public updatePosition(): void {
     if (this.wrapperElement) {
-      if (direction === DIRECTION.VERTICAL) {
-        this.wrapperElement.style.top = toPx(this.start);
-        this.wrapperElement.style.height = toPx(this.size);
-      } else if (direction === DIRECTION.HORIZONTAL) {
-        this.wrapperElement.style.left = toPx(this.start);
-        this.wrapperElement.style.width = toPx(this.size);
+      switch (this.parent._direction) {
+        case DIRECTION.VERTICAL:
+          this.wrapperElement.style.top = toPx(this.start);
+          this.wrapperElement.style.height = toPx(this.size);
+          break;
+        case DIRECTION.HORIZONTAL:
+          this.wrapperElement.style.left = toPx(this.start);
+          this.wrapperElement.style.width = toPx(this.size);
+          break;
       }
     } else {
       throw new Error('element not mounted');
@@ -43,23 +46,22 @@ export class VirtualElement<T> {
     return !!this.renderer && !!this.wrapperElement;
   }
 
-  mountRenderer(
-    direction: DIRECTION,
-    element: HTMLElement,
-    renderer: VanillaRecyclerViewRenderer<T>
-  ): void {
-    if (!this.renderer && !this.wrapperElement) {
-      if (direction === DIRECTION.VERTICAL) {
-        element.style.top = toPx(this.start);
-        element.style.height = toPx(this.size);
-      } else if (direction === DIRECTION.HORIZONTAL) {
-        element.style.left = toPx(this.start);
-        element.style.width = toPx(this.size);
+  mountRenderer(reusable: Reusable<T>): void {
+    if (!this.isMounted()) {
+      switch (this.parent._direction) {
+        case DIRECTION.VERTICAL:
+          reusable.wrapperElement.style.top = toPx(this.start);
+          reusable.wrapperElement.style.height = toPx(this.size);
+          break;
+        case DIRECTION.HORIZONTAL:
+          reusable.wrapperElement.style.left = toPx(this.start);
+          reusable.wrapperElement.style.width = toPx(this.size);
+          break;
       }
-      this.wrapperElement = element;
-      this.renderer = renderer;
+      this.wrapperElement = reusable.wrapperElement;
+      this.renderer = reusable.renderer;
     } else {
-      throw new Error('renderer already mounted');
+      throw new Error('reusable already mounted');
     }
   }
 
@@ -83,5 +85,10 @@ export class VirtualElement<T> {
     } else {
       throw new Error('renderer not mounted');
     }
+  }
+
+  destroyRenderer(): void {
+    const reusable = this.unmountRenderer();
+    reusable.wrapperElement.parentElement?.removeChild(reusable.wrapperElement);
   }
 }

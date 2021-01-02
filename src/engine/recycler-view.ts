@@ -60,20 +60,20 @@ export class VanillaRecyclerView<T> {
   /* constants */
   private root: HTMLDivElement;
 
-  private _direction: DIRECTION;
-  private _preload: number;
-  private _size: ((params: SizeParams<T>) => number) | number;
-  private _renderer: RendererConstructor<T>;
+  public _direction: DIRECTION;
+  public _preload: number;
+  public _size: ((params: SizeParams<T>) => number) | number;
+  public _renderer: RendererConstructor<T>;
 
   /* virtual scroll area element */
   private container: HTMLDivElement;
 
   /* all virtual elements */
-  private virtualElements: VirtualElement<T>[] = [];
+  public virtualElements: VirtualElement<T>[] = [];
   /* current mounted virtual elements */
-  private mountedVirtualElements: VirtualElement<T>[] = [];
+  public mountedVirtualElements: VirtualElement<T>[] = [];
   /* unmounted, reusable elements */
-  private reusables: Reusable<T>[] = [];
+  public reusables: Reusable<T>[] = [];
 
   public constructor(
     root: HTMLDivElement,
@@ -192,21 +192,13 @@ export class VanillaRecyclerView<T> {
           index: virtualDom.index,
         });
         if (refreshed) {
-          virtualDom.mountRenderer(
-            this._direction,
-            reusable.wrapperElement,
-            reusable.renderer
-          );
+          virtualDom.mountRenderer(reusable);
         } else {
           reusable.wrapperElement.parentElement?.removeChild(
             reusable.wrapperElement
           );
           const createdReusable = this.createReusable(virtualDom);
-          virtualDom.mountRenderer(
-            this._direction,
-            createdReusable.wrapperElement,
-            createdReusable.renderer
-          );
+          virtualDom.mountRenderer(createdReusable);
           this.container.append(createdReusable.wrapperElement);
         }
       } else if (reusable) {
@@ -214,25 +206,17 @@ export class VanillaRecyclerView<T> {
           reusable.wrapperElement
         );
         const createdReusable = this.createReusable(virtualDom);
-        virtualDom.mountRenderer(
-          this._direction,
-          createdReusable.wrapperElement,
-          createdReusable.renderer
-        );
+        virtualDom.mountRenderer(createdReusable);
         this.container.append(createdReusable.wrapperElement);
       } else {
         const createdReusable = this.createReusable(virtualDom);
-        virtualDom.mountRenderer(
-          this._direction,
-          createdReusable.wrapperElement,
-          createdReusable.renderer
-        );
+        virtualDom.mountRenderer(createdReusable);
         this.container.append(createdReusable.wrapperElement);
       }
     });
 
     mounted.forEach((virtualDom) => {
-      virtualDom.updatePosition(this._direction);
+      virtualDom.updatePosition();
     });
 
     this.mountedVirtualElements = shouldMount;
