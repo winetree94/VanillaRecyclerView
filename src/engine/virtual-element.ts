@@ -60,6 +60,9 @@ export class VirtualElement<T> {
       }
       this.wrapperElement = reusable.wrapperElement;
       this.renderer = reusable.renderer;
+      if (!this.wrapperElement.parentElement) {
+        this.parent.container.append(this.wrapperElement);
+      }
     } else {
       throw new Error('reusable already mounted');
     }
