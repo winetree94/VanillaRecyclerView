@@ -17,6 +17,7 @@ export interface Reusable<T> {
 export interface SizeParams<T> {
   api: VanillaRecyclerView<T>;
   data: T;
+  index: number;
 }
 
 export interface InitializeParams<T> {
@@ -226,9 +227,9 @@ export class VanillaRecyclerView<T> {
    * parse size option
    * @param data
    */
-  private getSize(data: T): number {
+  private getSize(index: number, data: T): number {
     if (typeof this._size === 'function') {
-      return this._size({ api: this, data: data });
+      return this._size({ api: this, data: data, index: index });
     } else {
       return this._size;
     }
@@ -264,7 +265,7 @@ export class VanillaRecyclerView<T> {
 
   public calcalateSize(): void {
     const viewSize = this.virtualElements.reduce((start, virtualDom, index) => {
-      const currentSize = this.getSize(virtualDom.data);
+      const currentSize = this.getSize(index, virtualDom.data);
       virtualDom.setIndex(index);
       virtualDom.setPosition(start, currentSize);
       return start + currentSize;
