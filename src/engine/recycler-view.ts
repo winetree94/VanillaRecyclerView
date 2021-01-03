@@ -187,26 +187,22 @@ export class VanillaRecyclerView<T> {
     toMount.forEach((virtualDom) => {
       const reusable: Reusable<T> = (() => {
         const reusable = this.getNextReusable();
-        if (reusable && reusable.renderer.onMount) {
-          const refreshed = reusable.renderer.onMount({
+
+        const refreshed =
+          reusable &&
+          reusable.renderer.onMount &&
+          reusable.renderer.onMount({
             api: this,
             data: virtualDom.data,
             index: virtualDom.index,
           });
-          if (refreshed) {
-            return reusable;
-          } else {
-            reusable.wrapperElement.parentElement?.removeChild(
-              reusable.wrapperElement
-            );
-            return this.createReusable(virtualDom);
-          }
-        } else if (reusable) {
-          reusable.wrapperElement.parentElement?.removeChild(
+
+        if (reusable && refreshed) {
+          return reusable;
+        } else {
+          reusable?.wrapperElement.parentElement?.removeChild(
             reusable.wrapperElement
           );
-          return this.createReusable(virtualDom);
-        } else {
           return this.createReusable(virtualDom);
         }
       })();
