@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 import '../modules/zoom-listener';
-import { toPx, VirtualElement } from './';
+import { parsePx, toPx, VirtualElement } from './';
 export const DEFAULT_ITEM_SIZE = 50;
 
 export enum DIRECTION {
@@ -57,7 +57,15 @@ export interface VanillaRecyclerViewOptions<T> {
   renderer: RendererConstructor<T>;
 }
 
-export class VanillaRecyclerView<T> {
+export interface VanillaRecyclerViewAPI<T> {
+  calcalateSize: () => void;
+  getMaxScrollSize: () => number;
+  splice: (start: number, end?: number) => void;
+  insert: (index: number, ...data: T[]) => void;
+  push: (...items: T[]) => void;
+}
+
+export class VanillaRecyclerView<T> implements VanillaRecyclerViewAPI<T> {
   /* constants */
   private root: HTMLDivElement;
 
@@ -73,6 +81,8 @@ export class VanillaRecyclerView<T> {
   public virtualElements: VirtualElement<T>[] = [];
   /* current mounted virtual elements */
   public mountedVirtualElements: VirtualElement<T>[] = [];
+  /* pending unmount */
+  public pendingUnmount: VirtualElement<T>[] = [];
   /* unmounted, reusable elements */
   public reusables: Reusable<T>[] = [];
 
@@ -139,19 +149,36 @@ export class VanillaRecyclerView<T> {
       width: screenWidth,
     } = this.root.getBoundingClientRect();
 
-    let startSize = scrollTop;
-    let endSize = scrollTop + screenHeight;
+    const maxScrollSize = this.getMaxScrollSize();
+    let currentScrollSize = 0;
+    let startSize = 0;
+    let endSize = 0;
 
     /* calculate direction */
     switch (this._direction) {
       case DIRECTION.VERTICAL:
+        currentScrollSize = scrollTop + screenHeight;
         startSize = scrollTop - this._preload;
         endSize = scrollTop + screenHeight + this._preload;
         break;
       case DIRECTION.HORIZONTAL:
+        currentScrollSize = scrollLeft + screenWidth;
         startSize = scrollLeft - this._preload;
         endSize = scrollLeft + screenWidth + this._preload;
         break;
+    }
+
+    if (currentScrollSize > maxScrollSize) {
+      switch (this._direction) {
+        case DIRECTION.VERTICAL:
+          this.root.scrollTop = maxScrollSize - screenHeight;
+          break;
+        case DIRECTION.HORIZONTAL:
+          this.root.scrollLeft = maxScrollSize - screenWidth;
+          break;
+      }
+      this.onScroll();
+      return;
     }
 
     const shouldMount = this.virtualElements.filter((virtualDom) => {
@@ -172,18 +199,25 @@ export class VanillaRecyclerView<T> {
       }
     });
 
-    const toUnmount = this.mountedVirtualElements.filter(
-      (virtualDom) => !shouldMount.includes(virtualDom)
+    const toUnmount = this.pendingUnmount.concat(
+      this.mountedVirtualElements.filter(
+        (virtualDom) => !shouldMount.includes(virtualDom)
+      )
     );
 
     /**
      * unmount and save reusable dom
      */
     toUnmount.forEach((virtualDom) => {
-      const reusable = virtualDom.unmountRenderer();
-      this.reusables.push(reusable);
+      if (virtualDom.isMounted()) {
+        const reusable = virtualDom.unmountRenderer();
+        this.reusables.push(reusable);
+      }
     });
 
+    /**
+     * mount
+     */
     toMount.forEach((virtualDom) => {
       const reusable: Reusable<T> = (() => {
         const reusable = this.getNextReusable();
@@ -210,10 +244,34 @@ export class VanillaRecyclerView<T> {
       virtualDom.mountRenderer(reusable);
     });
 
+    /**
+     * update mounted renderer position
+     */
     mounted.forEach((virtualDom) => {
       virtualDom.updatePosition();
     });
 
+    /**
+     * remove overflowed reusables
+     */
+    this.reusables.forEach((reusable) => {
+      let start = 0;
+      switch (this._direction) {
+        case DIRECTION.VERTICAL:
+          start = parsePx(reusable.wrapperElement.style.top) + screenHeight;
+          break;
+        case DIRECTION.HORIZONTAL:
+          start = parsePx(reusable.wrapperElement.style.left) + screenWidth;
+          break;
+      }
+      if (start > maxScrollSize) {
+        reusable.wrapperElement.parentElement?.removeChild(
+          reusable.wrapperElement
+        );
+      }
+    });
+
+    this.pendingUnmount = [];
     this.mountedVirtualElements = shouldMount;
   }
 
@@ -257,6 +315,14 @@ export class VanillaRecyclerView<T> {
     }
   }
 
+  private setData(data: T[]): void {
+    this.virtualElements = data.map(
+      (data) => new VirtualElement<T>(this, data)
+    );
+    this.calcalateSize();
+    this.onScroll();
+  }
+
   public calcalateSize(): void {
     const viewSize = this.virtualElements.reduce((start, virtualDom, index) => {
       const currentSize = this.getSize(index, virtualDom.data);
@@ -276,10 +342,41 @@ export class VanillaRecyclerView<T> {
     }
   }
 
-  private setData(data: T[]): void {
-    this.virtualElements = data.map(
+  public getMaxScrollSize(): number {
+    switch (this._direction) {
+      case DIRECTION.VERTICAL:
+        return parsePx(this.container.style.height);
+      case DIRECTION.HORIZONTAL:
+        return parsePx(this.container.style.width);
+    }
+  }
+
+  public splice(start: number, end?: number): void {
+    if (end === undefined) {
+      this.pendingUnmount = this.virtualElements.splice(start);
+    } else {
+      this.pendingUnmount = this.virtualElements.splice(start, end);
+    }
+    this.calcalateSize();
+    this.onScroll();
+  }
+
+  public insert(index: number, ...data: T[]): void {
+    const prefix = this.virtualElements.slice(0, index);
+    const surfix = this.virtualElements.slice(index);
+    const virtualElements = data.map(
       (data) => new VirtualElement<T>(this, data)
     );
+    this.virtualElements = [...prefix, ...virtualElements, ...surfix];
+    this.calcalateSize();
+    this.onScroll();
+  }
+
+  public push(...items: T[]): void {
+    const virtualElements = items.map(
+      (item) => new VirtualElement<T>(this, item)
+    );
+    this.virtualElements.push(...virtualElements);
     this.calcalateSize();
     this.onScroll();
   }

@@ -235,3 +235,43 @@ export interface VanillaRecyclerViewRenderer<T> {
   onUnmount?: (params: UnmountParams<T>) => void;
 }
 ```
+
+## 3. VanillaRecyclerViewAPI
+
+VanillaRecyclerView 생성자를 통해 생성된 인스턴스에 접근하여, API 함수를 사용할 수 있습니다.
+
+단순한 사용 예시는 아래와 같습니다.
+```javascript
+const recyclerView = new VanillaRecyclerView(element, { ... });
+recyclerView.push({});
+```
+
+호출 가능한 모든 API 함수의 목록은 아래와 같습니다.
+```typescript
+export interface VanillaRecyclerViewAPI<T> {
+  /*
+   * 전체 스크롤 영역을 재계산하고, 모든 가상 DOM 객체에 index 와 요소별 사이즈를 재할당합니다.
+   * 이 함수는 필요에 따라 내부적으로 자동적으로 호출되며, 수동으로 호출할 필요가 없습니다.
+   */
+  calcalateSize: () => void;
+  /*
+   * 전체 스크롤 영역을 px 단위로 반환합니다.
+   */
+  getMaxScrollSize: () => number;
+  /*
+   * 요소를 특정 index 위치에 추가합니다.
+   * 다중 요소를 한번에 추가할 수 있습니다.
+   */
+  insert: (index: number, ...data: T[]) => void;
+  /*
+   * 스크롤 영역에서 요소를 제거합니다.
+   * Array.prototype.slice 와 동일하게 동작합니다.
+   */
+  splice: (start: number, end?: number) => void;
+  /*
+   * 요소를 스크롤 영역의 마지막 위치에 추가합니다.
+   * Array.prototype.push 와 동일하게 동작합니다.
+   */ 
+  push: (...items: T[]) => void;
+}
+```

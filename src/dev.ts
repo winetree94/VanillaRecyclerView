@@ -25,7 +25,6 @@ if (root1) {
   const rowNumberToCreate = 10000;
 
   const options: VanillaRecyclerViewOptions<D> = {
-    preload: 100,
     data: Array.from(new Array(rowNumberToCreate)).map((a, index) => ({
       a: Math.random(),
       b: Math.random(),
@@ -59,6 +58,8 @@ if (root1) {
   };
 
   const instance = new VanillaRecyclerView(root1, options);
+
+  console.log(instance);
 }
 
 const root2 = document.getElementById('root2') as HTMLDivElement;

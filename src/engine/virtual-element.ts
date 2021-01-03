@@ -47,7 +47,7 @@ export class VirtualElement<T> {
   }
 
   mountRenderer(reusable: Reusable<T>): void {
-    if (!this.isMounted()) {
+    if (!this.wrapperElement && !this.renderer) {
       switch (this.parent._direction) {
         case DIRECTION.VERTICAL:
           reusable.wrapperElement.style.top = toPx(this.start);
