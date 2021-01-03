@@ -31,6 +31,7 @@ VanillaRecyclerView 는 웹에서 대량의 데이터를 효과적으로 제어�
 - [재사용 DOM 예제](https://stackblitz.com/edit/vanilla-recycler-view-reusable-example?file=index.js)
 - [타입스크립트와 함께 사용](https://stackblitz.com/edit/vanilla-recycler-view-typescript-example?file=index.ts)
 - [복잡한 레이아웃 구현](https://stackblitz.com/edit/vanilla-recycler-view-complex-example?file=index.ts)
+- [무한 스크롤 구현](https://stackblitz.com/edit/vanilla-recycler-view-infinity-scroll-example?file=index.ts)
 
 ---
 
