@@ -58,7 +58,7 @@ export interface VanillaRecyclerViewOptions<T> {
 }
 
 export interface VanillaRecyclerViewAPI<T> {
-  calcalateSize: () => void;
+  calculateSize: () => void;
   getMaxScrollSize: () => number;
   splice: (start: number, end?: number) => void;
   insert: (index: number, ...data: T[]) => void;
@@ -149,7 +149,9 @@ export class VanillaRecyclerView<T> implements VanillaRecyclerViewAPI<T> {
       width: screenWidth,
     } = this.root.getBoundingClientRect();
 
-    const maxScrollSize = this.getMaxScrollSize();
+    const max = this.getMaxScrollSize();
+    const maxScrollSize =
+      max > this.root.clientHeight ? max : this.root.clientHeight;
     let currentScrollSize = 0;
     let startSize = 0;
     let endSize = 0;
@@ -181,6 +183,10 @@ export class VanillaRecyclerView<T> implements VanillaRecyclerViewAPI<T> {
       return;
     }
 
+    /**
+     * todo
+     * use map to save some performance
+     */
     const shouldMount = this.virtualElements.filter((virtualDom) => {
       return (
         virtualDom.start >= startSize &&
@@ -315,15 +321,20 @@ export class VanillaRecyclerView<T> implements VanillaRecyclerViewAPI<T> {
     }
   }
 
-  private setData(data: T[]): void {
+  public setData(data: T[]): void {
+    this.reusables = [];
+    this.pendingUnmount = this.virtualElements.slice();
+    this.virtualElements = [];
+    this.calculateSize();
+    this.onScroll();
     this.virtualElements = data.map(
       (data) => new VirtualElement<T>(this, data)
     );
-    this.calcalateSize();
+    this.calculateSize();
     this.onScroll();
   }
 
-  public calcalateSize(): void {
+  public calculateSize(): void {
     const viewSize = this.virtualElements.reduce((start, virtualDom, index) => {
       const currentSize = this.getSize(index, virtualDom.data);
       virtualDom.setIndex(index);
@@ -357,7 +368,7 @@ export class VanillaRecyclerView<T> implements VanillaRecyclerViewAPI<T> {
     } else {
       this.pendingUnmount = this.virtualElements.splice(start, end);
     }
-    this.calcalateSize();
+    this.calculateSize();
     this.onScroll();
   }
 
@@ -368,7 +379,7 @@ export class VanillaRecyclerView<T> implements VanillaRecyclerViewAPI<T> {
       (data) => new VirtualElement<T>(this, data)
     );
     this.virtualElements = [...prefix, ...virtualElements, ...surfix];
-    this.calcalateSize();
+    this.calculateSize();
     this.onScroll();
   }
 
@@ -377,7 +388,7 @@ export class VanillaRecyclerView<T> implements VanillaRecyclerViewAPI<T> {
       (item) => new VirtualElement<T>(this, item)
     );
     this.virtualElements.push(...virtualElements);
-    this.calcalateSize();
+    this.calculateSize();
     this.onScroll();
   }
 }

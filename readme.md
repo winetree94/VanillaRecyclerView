@@ -254,6 +254,11 @@ export interface VanillaRecyclerViewAPI<T> {
    * Returns the entire scroll area in px.
    */
   getMaxScrollSize: () => number;
+  /**
+   * replace all data.
+   * it will destroy all of rendered elements and recreate
+   */
+  setData: (data: T[]) => void;
   /*
    * Add an element at a specific index position.
    * Multiple elements can be added at once.
