@@ -2,44 +2,43 @@
 [![GitHub license](https://img.shields.io/github/license/winetree94/VanillaRecyclerView)](https://github.com/winetree94/VanillaRecyclerView/blob/master/LICENSE)
 [![npm version](https://badge.fury.io/js/vanilla-recycler-view.svg)](https://badge.fury.io/js/vanilla-recycler-view)
 
-한국어 | [English](https://github.com/winetree94/VanillaRecyclerView/blob/master/readme/readme-en.md)
+English | [한국어](https://github.com/winetree94/VanillaRecyclerView/blob/master/readme/readme-ko.md)
 
 # VanillaRecyclerView For WebBrowser
 
 ![Honeycam 2021-01-01 10-06-55](https://user-images.githubusercontent.com/51369962/103431777-0f542c00-4c19-11eb-8148-269f7e62a491.gif)
 
-VanillaRecyclerView 는 웹에서 대량의 데이터를 효과적으로 제어하고 화면에 렌더링하기 위한 고성능 UI 렌더링 라이브러리 입니다. 순수한 자바스크립트로 설계되었으며, 손쉬운 사용성을 제공합니다. 
+VanillaRecyclerView is a high-performance UI rendering library for modern web browser. Specially designed with effectively control and render large amounts of data. It is built with pure JavaScript and is easy to use.
+This can be used when you need to repeatedly display a lot of DOM in the scroll area, like Instagram.
 
-인스타그램처럼 스크롤 영역에 수많은 DOM을 반복적으로 표현해야 하는 경우 사용할 수 있습니다.
+Key support points are as follows.
 
-주요 지원사항은 아래와 같습니다.
+### Virtual DOM
 
-### 가상화 DOM
+Renders only the areas you are viewing in real time in the entire scrolling area. This can speed up the initial rendering of the page and increase the overall performance.
 
-가로 또는 세로의 전체 스크롤 영역에서 사용자가 보고 있는 영역만을 실시간으로 렌더링합니다. 페이지의 초기 렌더링 속도를 향상시키고, 전체 퍼포먼스를 증가시킬 수 있습니다.
+### Reusable DOM
 
-### 재사용 DOM
-
-매 순간 새로운 DOM 을 생성하는 것이 아니라, 현재 스크롤 영역에서 벗어난 기존의 DOM 을 재사용합니다. 실시간 렌더링에 따른 스크롤 성능 저하를 최소화 할 수 있습니다.
-
----
-
-# 실시간 예제들
-
-- [빠른 시작(세로)](https://stackblitz.com/edit/vanilla-recycler-view-quickstart-example?file=index.js)
-- [빠른 시작(가로)](https://stackblitz.com/edit/vanilla-recycler-view-quickstart-horizontal-example?file=index.js)
-- [재사용 DOM 예제](https://stackblitz.com/edit/vanilla-recycler-view-reusable-example?file=index.js)
-- [타입스크립트와 함께 사용](https://stackblitz.com/edit/vanilla-recycler-view-typescript-example?file=index.ts)
-- [복잡한 레이아웃 구현](https://stackblitz.com/edit/vanilla-recycler-view-complex-example?file=index.ts)
-- [무한 스크롤 구현](https://stackblitz.com/edit/vanilla-recycler-view-infinity-scroll-example?file=index.ts)
+Rather than creating a new DOM at every moment, it reuses the existing DOM out of the current scroll area. You can minimize scroll performance degradation caused by real-time rendering.
 
 ---
 
-# 설치 방법
+# Live Examples
 
-#### 브라우저에서 사용시
+- [QuickStart(Vertical)](https://stackblitz.com/edit/vanilla-recycler-view-quickstart-example?file=index.js)
+- [QuickStart(Horizontal)](https://stackblitz.com/edit/vanilla-recycler-view-quickstart-horizontal-example?file=index.js)
+- [Use ReusableDOM feature](https://stackblitz.com/edit/vanilla-recycler-view-reusable-example?file=index.js)
+- [Integrate with typescript](https://stackblitz.com/edit/vanilla-recycler-view-typescript-example?file=index.ts)
+- [rendering complex layout](https://stackblitz.com/edit/vanilla-recycler-view-complex-example?file=index.ts)
+- [infinity scroll](https://stackblitz.com/edit/vanilla-recycler-view-infinity-scroll-example?file=index.ts)
 
-CDN 을 통해 설치없이 html 에 직접 import 할 수 있습니다.
+---
+
+# Installation
+
+#### In Web Browser
+
+It can be imported directly into html without installation through CDN.
 
 ```html
 <link rel="stylesheet" href="https://unpkg.com/vanilla-recycler-view@latest/dist/vanilla-recycler-view.min.css">
@@ -52,9 +51,9 @@ const options = {...};
 const recyclerView = new VanillaRecyclerView(table, options);
 ```
 
-#### 웹팩 또는 이외의 모듈 번들러와 사용 시
+#### Webpack or other module bundlers
 
-npm 을 통한 패키지를 제공합니다.
+provide packages through npm.
 
 ```bash
 $ npm i vanilla-recycler-view
@@ -71,65 +70,63 @@ const recyclerView = new VanillaRecyclerView(root, options);
 
 ---
 
-# API 문서
+# API Document
 
-## 1. 옵션
+## 1. VanillaRecyclerViewOptions
 
-VanillaRecyclerView는 최소한 data, renderer 두개의 옵션을 제공해야 사용할 수 있습니다. 그리고 스크롤 영역을 생성할 DOM 엘리먼트는 반드시 정해진 높이를 가지고 있어야 합니다.
+VanillaRecyclerView can be used by providing at least two options: data and renderer. And the DOM element that will create the scroll area must have a fixed height.
 
-최소한의 옵션을 사용한 단순한 사용 예시는 아래와 같습니다.
-
+A simple usage example with minimal options is shown below.
 ```javascript
 const element = document.getElementById('element');
 element.style.height = '500px';
 const options = {
   data: [{}, {}, {}],
-  renderer: class { ...하단 참조 }
+  renderer: class { ...This is explained below. }
 }
 new VanillRecyclerView(element, options);
 ```
 
-사용할 수 있는 모든 옵션의 목록은 아래와 같습니다.
-
+Below is a list of all available options.
 ```typescript
 export interface VanillaRecyclerViewOptions<T> {
   /*
-   * 선택사항
+   * Optional
    *
-   * 스크롤의 방향을 지정합니다.
-   * 'vertical' 또는 'horizontal' 중 하나를 사용할 수 있습니다.
-   * 정의하지 않으면 'vertical'로 동작합니다.
+   * Specifies the direction of scrolling.
+   * You can use either 'vertical' or 'horizontal'.
+   * If not defined, it operates as 'vertical'.
    */
   direction?: DIRECTION;
   /*
-   * 선택사항
+   * Optional
    *
-   * 상하 또는 좌우로 미리 렌더링할 영역을 픽셀단위로 지정할 수 있습니다.
-   * 스크롤 시 깜빡임이 발생할 경우 이 값을 늘려 해결할 수 있습니다.
-   * 요소의 (최대 높이나 너비의 x 2) 값을 권장합니다.
-   * 정의하지 않으면 50px로 동작합니다.
+   * You can specify the area to be pre-rendered vertically or horizontally in pixels.
+   * If flickering occurs when scrolling, this can be corrected by increasing this value.
+   * If not defined, it will work at 50px.
    */
   preload?: number;
   /*
-   * 선택사항
+   * Optional
    *
-   * 가상화 방식의 한계로 인해, 요소별 높이 또는 너비를 절대값으로 지정해야 합니다.
-   * 숫자 또는 함수 형태를 지원하며,
-   * 함수 형태로 사용하는 경우 요소별로 동적인 사이즈 할당이 가능합니다.
-   * 정의하지 않으면 50px로 동작합니다.
+   * Due to the limitations of the VirtualDom,
+   * you must specify a fixed height or width value for each element.
+   * It supports number or function.
+   * Dynamic size allocation is possible for each element when used in function.
+   * If not defined, it will work at 50px.
    */
   size?: ((params: RowHeightParams<T>) => number) | number;
   /**
-   * 필수사항
+   * Requirement
    * 
-   * 렌더링해야할 데이터 리스트입니다.
+   * List of data to be rendered.
    */
   data: T[];
   /*
-   * 필수사항
+   * Requirement
    *
-   * 렌더링에 사용할 생성자 함수 또는 클래스를 제공해야 합니다.
-   * 이는 하단에서 설명합니다.
+   * You must provide a constructor function or class to use for rendering.
+   * This is explained below.
    */
   renderer: VanillaRecyclerViewRenderer<T>;
 }
@@ -137,16 +134,14 @@ export interface VanillaRecyclerViewOptions<T> {
 
 ---
 
-## 2. 렌더러
+## 2. VanillaRecyclerViewRenderer
 
-VanillaRecyclerView 는 옵션의 renderer 프로퍼티를 통해 제공된 생성자 함수 또는 클래스로 렌더러 인스턴스를 생성하고 화면을 그리는데 사용합니다.
+VanillaRecyclerView use provided renderer constructor to create a renderer instance and draw the layout
+The provided class must define two prototype functions, initialize and getLayout.
 
-제공된 클래스는 반드시 initialize, getLayout 두개의 프로토타입 함수를 사전에 정의해야 합니다.
+In the initialize function, the DOM must be created with the data of the argument, and the created Dom must be returned in the getLayout function.
 
-initilize 함수에서는 인자로 주입되는 데이터로 DOM 을 생성하고, getLayout 에서는 단순히 생성한 Dom 을 반환하도록 작성하면 됩니다.
-
-단순한 예시는 아래와 같습니다.
-
+A simple example is shown below.
 ```javascript
 new RecyclerView(element, {
   data: [{ name: 'first' }, { name: 'second' }, { name: 'third' }],
@@ -165,9 +160,9 @@ new RecyclerView(element, {
 })
 ```
 
-VanillaRecyclerView 는 기본적으로 데이터 요소별로 하나의 렌더러 인스턴스를 생성해 사용합니다. 하지만 onMount 함수를 정의한 경우는 화면에서 벗어난 렌더러 인스턴스를 재활용하며, 인스턴스를 새로 생성하지 않습니다.
+VanillaRecyclerView basically creates and uses one renderer instance per data element. However, if you define the onMount function, renderer instances that are off the screen are recycled and no new instances are created.
 
-단순한 예시는 아래와 같습니다.
+A simple example is shown below.
 ```javascript
 new RecyclerView(element, {
   data: [{ name: 'first' }, { name: 'second' }, { name: 'third' }],
@@ -193,45 +188,45 @@ new RecyclerView(element, {
 })
 ```
 
-사용자는 onMount 함수의 인자로 주입되는 새로운 데이터로 이전에 생성한 DOM 에 접근하여 화면상의 값을 교체해야 합니다.
+The onMount function should access the previously created DOM with new data injected as an argument and replace the on-screen value.
 
-이렇게 하면 기존에 생성했던 DOM 은 그대로 재사용하게 되고, 화면에 표시되는 값만이 변경되게 됩니다. DOM 의 스크롤 영역상의 위치는 VanillaRecyclerView 에서 스스로 관리합니다.
+In this way, the existing DOM is reused as it is, and only the values displayed on the screen are changed. The position on the scroll area of the DOM is managed by VanillaRecyclerView itself.
 
-렌더러에서 사용할 수 있는 모든 함수의 목록과 설명은 아래와 같습니다.
+Below is a list and description of all functions available in the renderer.
 ```typescript
 export interface VanillaRecyclerViewRenderer<T> {
   /*
-   * 필수사항
+   * Requirement
    *
-   * 렌더러가 생성될 때 호출됩니다.
-   * 여기에서 최초로 DOM을 생성하고 이벤트를 할당합니다.
-   * 생성된 DOM은 인스턴스 내부에 할당해서 getLayout 함수를 통해 반환해야 합니다.
+   * Called when the renderer is created.
+   * First you need to create the DOM and assign events to it.
+   * The created DOM must be allocated inside the instance and returned through the getLayout function.
    */
   initialize: (params: LayoutParams<T>) => void;
   /*
-   * 필수사항
+   * Requirement
    *
-   * RecyclerView 가 내부적으로 DOM에 접근하는 엔드포인트 함수입니다.
-   * 반드시 미리 생성한 DOM 을 반환해야합니다. 
+   * This is the endpoint function that VanillaRecyclerView accesses the DOM internally.
+   * Must return created DOM. 
    */
   getLayout: () => HTMLElement;
   /*
-   * 선택사항, 하지만 권장됩니다.
+   * Optional, but highly recommended.
    *
-   * DOM이 재사용되기 직전에 호출되는 함수입니다.
-   * RecyclerView 는 기본적으로 가상화 DOM 방식으로만 동작하며 이 함수가 구현되었을 경우에만 재사용 DOM 기능을 활성화합니다.
-   * 기존에 생성한 DOM 의 값을 재할당하고, 새로운 이벤트를 바인딩해야 합니다.
+   * This function is called just before the DOM is reused.
+   * RecyclerView basically only works with VirtaulDom,
+   * It enables ReusableDOM feature only when this function is implemented.
+   * You need to reallocate the values of the DOM and bind new events.
    * 
-   * true 를 반환하는 경우 VanillaRecyclerView 는 렌더러의 재사용에 성공했다고 판단하며,
-   * false 를 반환하는 경우 재사용을 취소하고 새로운 렌더러를 생성해 사용합니다.
+   * If true is returned, VanillaRecyclerView determines that the renderer has been reused successfully.
+   * and if false is returned, the reuse is canceled and a new renderer is created and used.
    */
   onMount?: (params: MountParams<T>) => boolean;
   /*
-   * 선택사항
+   * Optional
    * 
-   * 기존 DOM 이 스크롤 영역에서 벗어날 때 호출됩니다.
-   * 재사용할 DOM은 기존의 이벤트 리스너들이 남아있으므로,
-   * 반드시 이 함수에서 기존의 이벤트를 해제해야 합니다.
+   * Called when the existing DOM leaves the scroll area.
+   * Before onMount function called, you must disable old event listener from dom
    */
   onUnmount?: (params: UnmountParams<T>) => void;
 }
@@ -239,39 +234,39 @@ export interface VanillaRecyclerViewRenderer<T> {
 
 ## 3. VanillaRecyclerViewAPI
 
-VanillaRecyclerView 생성자를 통해 생성된 인스턴스에 접근하여, API 함수를 사용할 수 있습니다.
+You can access the created instance through the VanillaRecyclerView constructor and also can use some API functions.
 
-단순한 사용 예시는 아래와 같습니다.
+A simple usage example is shown below.
 ```javascript
 const recyclerView = new VanillaRecyclerView(element, { ... });
 recyclerView.push({});
 ```
 
-호출 가능한 모든 API 함수의 목록은 아래와 같습니다.
+Below is a list of all API functions that can be called.
 ```typescript
 export interface VanillaRecyclerViewAPI<T> {
   /*
-   * 전체 스크롤 영역을 재계산하고, 모든 가상 DOM 객체에 index 와 요소별 사이즈를 재할당합니다.
-   * 이 함수는 필요에 따라 내부적으로 자동적으로 호출되며, 수동으로 호출할 필요가 없습니다.
+   * Recalculates the entire scroll area, and reassigns index and element-specific size to all virtual DOM objects.
+   * This function is called automatically internally as needed, and there is no need to call it manually.
    */
   calcalateSize: () => void;
   /*
-   * 전체 스크롤 영역을 px 단위로 반환합니다.
+   * Returns the entire scroll area in px.
    */
   getMaxScrollSize: () => number;
   /*
-   * 요소를 특정 index 위치에 추가합니다.
-   * 다중 요소를 한번에 추가할 수 있습니다.
+   * Add an element at a specific index position.
+   * Multiple elements can be added at once.
    */
   insert: (index: number, ...data: T[]) => void;
   /*
-   * 스크롤 영역에서 요소를 제거합니다.
-   * Array.prototype.slice 와 동일하게 동작합니다.
+   * Remove the element.
+   * Works similarly to Array.prototype.splice
    */
   splice: (start: number, end?: number) => void;
   /*
-   * 요소를 스크롤 영역의 마지막 위치에 추가합니다.
-   * Array.prototype.push 와 동일하게 동작합니다.
+   * Adds the element to the end.
+   * Works similarly to Array.prototype.push
    */ 
   push: (...items: T[]) => void;
 }
