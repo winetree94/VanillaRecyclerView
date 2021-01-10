@@ -42,6 +42,8 @@ module.exports = {
     path: path.resolve(__dirname, './dist'),
     filename: 'vanilla-recycler-view.min.js'
   },
+  devtool: false,
+  target: ['web', 'es5'],
   optimization: {
     minimize: true,
     minimizer: [new TerserPlugin(), new CssMinimizerPlugin(),

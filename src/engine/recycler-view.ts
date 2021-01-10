@@ -133,13 +133,17 @@ export class VanillaRecyclerView<T> implements VanillaRecyclerViewAPI<T> {
     this.setData(options.data);
 
     /* append element */
-    this.root.append(this.container);
+    this.root.appendChild(this.container);
 
     // bind scroll, zoom event
     this.root.addEventListener('scroll', this.onScroll.bind(this));
-    document.body.addEventListener('zoom', this.onScroll.bind(this));
+    document.body.addEventListener('zoom', (e) => {
+      console.log('eee');
+
+      this.onScroll();
+    });
     // emit event for first render
-    this.root.dispatchEvent(new Event('scroll'));
+    this.onScroll();
   }
 
   private onScroll(): void {
@@ -198,7 +202,7 @@ export class VanillaRecyclerView<T> implements VanillaRecyclerViewAPI<T> {
     const toMount: VirtualElement<T>[] = [];
 
     shouldMount.forEach((virtualDom) => {
-      if (!this.mountedVirtualElements.includes(virtualDom)) {
+      if (this.mountedVirtualElements.indexOf(virtualDom) === -1) {
         toMount.push(virtualDom);
       } else {
         mounted.push(virtualDom);
@@ -207,7 +211,7 @@ export class VanillaRecyclerView<T> implements VanillaRecyclerViewAPI<T> {
 
     const toUnmount = this.pendingUnmount.concat(
       this.mountedVirtualElements.filter(
-        (virtualDom) => !shouldMount.includes(virtualDom)
+        (virtualDom) => shouldMount.indexOf(virtualDom) === -1
       )
     );
 
@@ -305,7 +309,7 @@ export class VanillaRecyclerView<T> implements VanillaRecyclerViewAPI<T> {
     });
 
     const element = renderer.getLayout();
-    container.append(element);
+    container.appendChild(element);
 
     return {
       wrapperElement: container,

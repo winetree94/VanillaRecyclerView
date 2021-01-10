@@ -1,12 +1,12 @@
 {
   "name": "vanilla-recycler-view",
-  "version": "1.1.2",
+  "version": "1.1.3",
   "description": "high performance UI rendering library for web browser",
   "main": "build/index.js",
   "types": "build/index.d.ts",
   "author": "winetree94",
   "license": "MIT",
-  "keywords": ["javascript", "reusabledom", "virtualdom", "vanilla", "frontend", "browser", "webpack"],
+  "keywords": ["javascript", "reusabledom", "virtualdom", "vanilla", "frontend", "browser", "webpack", "web", "ie"],
   "homepage": "https://winetree94.github.io/VanillaRecyclerView",
   "repository": "https://github.com/winetree94/VanillaRecyclerView",
   "files": [
