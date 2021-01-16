@@ -137,11 +137,7 @@ export class VanillaRecyclerView<T> implements VanillaRecyclerViewAPI<T> {
 
     // bind scroll, zoom event
     this.root.addEventListener('scroll', this.onScroll.bind(this));
-    document.body.addEventListener('zoom', (e) => {
-      console.log('eee');
-
-      this.onScroll();
-    });
+    document.body.addEventListener('zoom', () => this.onScroll());
     // emit event for first render
     this.onScroll();
   }
@@ -318,7 +314,7 @@ export class VanillaRecyclerView<T> implements VanillaRecyclerViewAPI<T> {
   }
 
   private getNextReusable(): Reusable<T> | null {
-    if (this.reusables) {
+    if (this.reusables && this.reusables.length) {
       return this.reusables.splice(0, 1)[0];
     } else {
       return null;
