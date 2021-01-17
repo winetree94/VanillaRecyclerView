@@ -19,56 +19,162 @@ export interface D {
 
 const root1 = document.getElementById('root1') as HTMLDivElement;
 
+/**
+ * Data model interface
+ */
+interface Person {
+  name: string;
+  age: number;
+  hobbies: string[];
+}
+
+/**
+ * create 50,000 data
+ */
+function createData(count: number): Person[] {
+  const result: Person[] = [];
+  for (let i = 0; i < count; i++) {
+    result.push({
+      name: Math.random().toString(36).substring(7),
+      age: Math.floor(Math.random() * Math.floor(30)),
+      hobbies: Array.from(
+        new Array(Math.floor(Math.random() * Math.floor(5)))
+      ).map(() => Math.random().toString(36).substring(7)),
+    });
+  }
+  return result;
+}
+
 if (root1) {
   root1.style.height = '500px';
 
-  const rowNumberToCreate = 100000;
+  const data: Person[] = createData(5000);
 
-  const options: VanillaRecyclerViewOptions<D> = {
-    data: Array.from(new Array(rowNumberToCreate)).map((a, index) => ({
-      a: Math.random(),
-      b: Math.random(),
-      index: index,
-      someValue: '',
-    })),
-    size: (params) => (params.data.a ? params.data.a * 100 : 100),
-    renderer: class implements VanillaRecyclerViewRenderer<D> {
-      public layout?: HTMLElement;
+  /**
+   * use option interface
+   */
+  const options: VanillaRecyclerViewOptions<Person> = {
+    data: data,
+    preload: 200,
+    /**
+     * Dynamic row size
+     */
+    size: (params) => {
+      return 85 + params.data.hobbies.length * 25;
+    },
+    renderer: class {
+      public $layout: HTMLElement;
+      public $index: HTMLInputElement;
+      public $name: HTMLInputElement;
+      public $nameListener: any;
+      public $age: HTMLInputElement;
+      public $ageListener: any;
+      public $hobbies: HTMLElement;
 
-      initialize(params: InitializeParams<D>) {
-        this.layout = document.createElement('div');
-        this.layout.innerHTML = `${params.data.index}`;
+      initialize(params: InitializeParams<Person>) {
+        this.$layout = document.createElement('div');
+        this.$layout.style.width = '100%';
+        this.$layout.innerHTML = `
+        <table>
+          <tr>
+            <td>
+              index : 
+            </td>
+            <td class="index">
+              ${params.index + 1}
+            </td>
+          </tr>
+          <tr>
+            <td>
+              name : 
+            </td>
+            <td>
+              <input class="name" value="${params.data.name}">
+            </td>
+          </tr>
+          <tr>
+            <td>
+              age :
+            </td>
+            <td>
+              <input class="age" value="${params.data.age}">
+            </td>
+          </tr>
+          <tr>
+            <td colspan="2" class="hobbies">
+              ${params.data.hobbies
+                .map(
+                  (hobby, index) => `
+                    <div>hobby ${index + 1}: ${hobby}</div>
+                  `
+                )
+                .join('')}
+            </td>
+          </tr>
+        </table>
+      `;
+
+        // allocate dom object
+        this.$index = this.$layout.querySelector('.index');
+        this.$name = this.$layout.querySelector('.name');
+        this.$age = this.$layout.querySelector('.age');
+        this.$hobbies = this.$layout.querySelector('.hobbies');
+
+        // create event listener
+        this.$nameListener = (e: Event) =>
+          (params.data.name = (e.target as HTMLInputElement).value);
+        this.$ageListener = (e: Event) =>
+          (params.data.age = parseInt((e.target as HTMLInputElement).value));
+
+        // bind event listener
+        this.$name.addEventListener('input', this.$nameListener);
+        this.$age.addEventListener('input', this.$ageListener);
+
       }
-
       getLayout() {
-        return this.layout as HTMLElement;
+        return this.$layout;
       }
+      onMount(params: MountParams<Person>) {
+        /* replace dom content */
+        this.$index.innerHTML = `${params.index}`;
+        this.$name.value = params.data.name;
+        this.$age.value = `${params.data.age}`;
+        this.$hobbies.innerHTML = params.data.hobbies
+          .map(
+            (hobby, index) => `
+            <div>hobby ${index + 1}: ${hobby}</div>
+          `
+          )
+          .join('');
 
-      onMount(params: MountParams<D>) {
-        if (this.layout) {
-          this.layout.innerHTML = `${params.data.index}`;
-        }
+        // create new event listener
+        this.$nameListener = (e: Event) =>
+          (params.data.name = (e.target as HTMLInputElement).value);
+        this.$ageListener = (e: Event) =>
+          (params.data.age = parseInt((e.target as HTMLInputElement).value));
+
+        // bind new event listener
+        this.$name.addEventListener('input', this.$nameListener);
+        this.$age.addEventListener('input', this.$ageListener);
+
         return true;
       }
 
-      onUnmount(params: UnmountParams<D>) {
-        return;
+      onUnmount() {
+        // unbind old event listener
+        this.$name.removeEventListener('input', this.$nameListener);
+        this.$age.removeEventListener('input', this.$ageListener);
+        // blur input
+        this.$name.blur();
+        this.$age.blur();
       }
     },
   };
 
-  const instance = new VanillaRecyclerView(root1, options);
-
-  console.log(instance);
-
-  console.log(
-    Array.from(new Array(1000)).map((a, index) => ({
-      a: Math.random(),
-      b: Math.random(),
-      index: index,
-      someValue: '',
-    }))
-  );
+  /**
+   * initialize RecyclerView
+   */
+  const instance = new VanillaRecyclerView<Person>(root1, options);
 }
 
 // const root2 = document.getElementById('root2') as HTMLDivElement;

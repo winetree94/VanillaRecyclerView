@@ -138,8 +138,6 @@ export class VanillaRecyclerView<T> implements VanillaRecyclerViewAPI<T> {
     // bind scroll, zoom event
     this.root.addEventListener('scroll', this.onScroll.bind(this));
     document.body.addEventListener('zoom', () => this.onScroll());
-    // emit event for first render
-    this.onScroll();
   }
 
   private onScroll(): void {
