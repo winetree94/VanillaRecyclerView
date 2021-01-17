@@ -1,6 +1,6 @@
 {
   "name": "vanilla-recycler-view",
-  "version": "1.1.5",
+  "version": "1.1.6",
   "description": "high performance UI rendering library for web browser",
   "main": "build/index.js",
   "types": "build/index.d.ts",

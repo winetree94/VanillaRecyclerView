@@ -148,8 +148,18 @@ export class VanillaRecyclerView<T> implements VanillaRecyclerViewAPI<T> {
     } = this.root.getBoundingClientRect();
 
     const max = this.getMaxScrollSize();
-    const maxScrollSize =
-      max > this.root.clientHeight ? max : this.root.clientHeight;
+    const maxScrollSize = (() => {
+      let clientSize = 0;
+      switch (this._direction) {
+        case DIRECTION.VERTICAL:
+          clientSize = this.root.clientHeight;
+          break;
+        case DIRECTION.HORIZONTAL:
+          clientSize = this.root.clientWidth;
+          break;
+      }
+      return max > clientSize ? max : clientSize;
+    })();
     let currentScrollSize = 0;
     let startSize = 0;
     let endSize = 0;
@@ -157,12 +167,12 @@ export class VanillaRecyclerView<T> implements VanillaRecyclerViewAPI<T> {
     /* calculate direction */
     switch (this._direction) {
       case DIRECTION.VERTICAL:
-        currentScrollSize = scrollTop + screenHeight;
+        currentScrollSize = Math.floor(scrollTop + screenHeight);
         startSize = scrollTop - this._preload;
         endSize = scrollTop + screenHeight + this._preload;
         break;
       case DIRECTION.HORIZONTAL:
-        currentScrollSize = scrollLeft + screenWidth;
+        currentScrollSize = Math.floor(scrollLeft + screenWidth);
         startSize = scrollLeft - this._preload;
         endSize = scrollLeft + screenWidth + this._preload;
         break;
@@ -177,6 +187,7 @@ export class VanillaRecyclerView<T> implements VanillaRecyclerViewAPI<T> {
           this.root.scrollLeft = maxScrollSize - screenWidth;
           break;
       }
+      console.log(currentScrollSize, maxScrollSize);
       this.onScroll();
       return;
     }

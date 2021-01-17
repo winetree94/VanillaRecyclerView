@@ -46,7 +46,8 @@ function createData(count: number): Person[] {
 }
 
 if (root1) {
-  root1.style.height = '500px';
+  root1.style.height = '400px';
+  root1.style.width = '100%';
 
   const data: Person[] = createData(5000);
 
@@ -54,6 +55,7 @@ if (root1) {
    * use option interface
    */
   const options: VanillaRecyclerViewOptions<Person> = {
+    direction: DIRECTION.VERTICAL,
     data: data,
     preload: 200,
     /**
