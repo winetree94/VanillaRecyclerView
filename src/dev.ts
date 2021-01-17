@@ -49,7 +49,7 @@ if (root1) {
   root1.style.height = '400px';
   root1.style.width = '100%';
 
-  const data: Person[] = createData(5000);
+  const data: Person[] = createData(50000);
 
   /**
    * use option interface
