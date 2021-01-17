@@ -167,30 +167,31 @@ export class VanillaRecyclerView<T> implements VanillaRecyclerViewAPI<T> {
     /* calculate direction */
     switch (this._direction) {
       case DIRECTION.VERTICAL:
-        currentScrollSize = Math.floor(scrollTop + screenHeight);
+        currentScrollSize = scrollTop + screenHeight;
         startSize = scrollTop - this._preload;
         endSize = scrollTop + screenHeight + this._preload;
         break;
       case DIRECTION.HORIZONTAL:
-        currentScrollSize = Math.floor(scrollLeft + screenWidth);
+        currentScrollSize = scrollLeft + screenWidth;
         startSize = scrollLeft - this._preload;
         endSize = scrollLeft + screenWidth + this._preload;
         break;
     }
 
-    if (currentScrollSize > maxScrollSize) {
-      switch (this._direction) {
-        case DIRECTION.VERTICAL:
-          this.root.scrollTop = maxScrollSize - screenHeight;
-          break;
-        case DIRECTION.HORIZONTAL:
-          this.root.scrollLeft = maxScrollSize - screenWidth;
-          break;
-      }
-      console.log(currentScrollSize, maxScrollSize);
-      this.onScroll();
-      return;
-    }
+    // todo fix
+    // if (currentScrollSize > maxScrollSize) {
+    //   switch (this._direction) {
+    //     case DIRECTION.VERTICAL:
+    //       this.root.scrollTop = maxScrollSize - screenHeight;
+    //       break;
+    //     case DIRECTION.HORIZONTAL:
+    //       this.root.scrollLeft = maxScrollSize - screenWidth;
+    //       break;
+    //   }
+    //   console.log(currentScrollSize, maxScrollSize);
+    //   this.onScroll();
+    //   return;
+    // }
 
     /**
      * todo
