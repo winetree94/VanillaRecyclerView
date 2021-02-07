@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/restrict-plus-operands */
 import {
   DIRECTION,
   VanillaRecyclerView,
@@ -49,7 +51,7 @@ if (root1) {
   root1.style.height = '400px';
   root1.style.width = '100%';
 
-  const data: Person[] = createData(50000);
+  const data: Person[] = createData(10);
 
   /**
    * use option interface
@@ -131,7 +133,6 @@ if (root1) {
         // bind event listener
         this.$name.addEventListener('input', this.$nameListener);
         this.$age.addEventListener('input', this.$ageListener);
-
       }
       getLayout() {
         return this.$layout;
@@ -177,6 +178,14 @@ if (root1) {
    * initialize RecyclerView
    */
   const instance = new VanillaRecyclerView<Person>(root1, options);
+
+  root1.addEventListener('scroll', () => {
+    if (root1.scrollTop + root1.clientHeight > root1.scrollHeight - 100) {
+      const data: Person[] = createData(1);
+      instance.push(...data);
+      console.log('added');
+    }
+  });
 }
 
 // const root2 = document.getElementById('root2') as HTMLDivElement;

@@ -1,3 +1,4 @@
 webpack.config.js
+jest.config.js
 ./dist/*
 ./build/*
