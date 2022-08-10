@@ -3,11 +3,9 @@
 import {
   DIRECTION,
   VanillaRecyclerView,
-  VanillaRecyclerViewRenderer,
   VanillaRecyclerViewOptions,
   InitializeParams,
   MountParams,
-  UnmountParams,
 } from './engine';
 import './styles.scss';
 

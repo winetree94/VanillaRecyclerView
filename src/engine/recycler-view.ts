@@ -4,6 +4,9 @@ import '../modules/zoom-listener';
 import { parsePx, toPx, VirtualElement } from './';
 export const DEFAULT_ITEM_SIZE = 50;
 
+/**
+ * @deprecated
+ */
 export enum DIRECTION {
   VERTICAL = 'vertical',
   HORIZONTAL = 'horizontal',
@@ -41,6 +44,10 @@ export interface UnmountParams<T> {
 export interface VanillaRecyclerViewRenderer<T> {
   initialize: (params: InitializeParams<T>) => void;
   getLayout: () => HTMLElement;
+
+  getId?: () => string;
+  getPosition?: () => string;
+
   onMount?: (params: MountParams<T>) => boolean;
   onUnmount?: (params: UnmountParams<T>) => void;
 }
@@ -53,6 +60,9 @@ export interface VanillaRecyclerViewOptions<T> {
   data: T[];
   direction?: DIRECTION;
   preload?: number;
+  /**
+   * @deprecated
+   */
   size?: ((params: SizeParams<T>) => number) | number;
   renderer: RendererConstructor<T>;
 }
@@ -351,6 +361,7 @@ export class VanillaRecyclerView<T> implements VanillaRecyclerViewAPI<T> {
       virtualDom.setPosition(start, currentSize);
       return start + currentSize;
     }, 0);
+
     switch (this._direction) {
       case DIRECTION.VERTICAL:
         this.container.style.height = toPx(viewSize);
@@ -372,6 +383,9 @@ export class VanillaRecyclerView<T> implements VanillaRecyclerViewAPI<T> {
     }
   }
 
+  /**
+   * @deprecated
+   */
   public splice(start: number, end?: number): void {
     if (end === undefined) {
       this.pendingUnmount = this.virtualElements.splice(start);
@@ -382,6 +396,9 @@ export class VanillaRecyclerView<T> implements VanillaRecyclerViewAPI<T> {
     this.onScroll();
   }
 
+  /**
+   * @deprecated
+   */
   public insert(index: number, ...data: T[]): void {
     const prefix = this.virtualElements.slice(0, index);
     const surfix = this.virtualElements.slice(index);
@@ -393,6 +410,9 @@ export class VanillaRecyclerView<T> implements VanillaRecyclerViewAPI<T> {
     this.onScroll();
   }
 
+  /**
+   * @deprecated
+   */
   public push(...items: T[]): void {
     const virtualElements = items.map(
       (item) => new VirtualElement<T>(this, item)
