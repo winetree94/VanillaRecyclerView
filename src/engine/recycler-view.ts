@@ -42,10 +42,11 @@ export interface UnmountParams<T> {
 }
 
 export interface VanillaRecyclerViewRenderer<T> {
+  key: string;
+
   initialize: (params: InitializeParams<T>) => void;
   getLayout: () => HTMLElement;
 
-  getId?: () => string;
   getPosition?: () => string;
 
   onMount?: (params: MountParams<T>) => boolean;
@@ -53,7 +54,7 @@ export interface VanillaRecyclerViewRenderer<T> {
 }
 
 export interface RendererConstructor<T> {
-  new (): VanillaRecyclerViewRenderer<T>;
+  new (data: T): VanillaRecyclerViewRenderer<T>;
 }
 
 export interface VanillaRecyclerViewOptions<T> {
@@ -138,6 +139,7 @@ export class VanillaRecyclerView<T> implements VanillaRecyclerViewAPI<T> {
     /* create wrapper element for scroll area */
     this.container = document.createElement('div');
     this.container.classList.add('recycler_view_container');
+    this.container.style.position = 'relative';
 
     /* create virtual element per data */
     this.setData(options.data);
@@ -316,7 +318,7 @@ export class VanillaRecyclerView<T> implements VanillaRecyclerViewAPI<T> {
   private createReusable(virtualElement: VirtualElement<T>): Reusable<T> {
     const container = document.createElement('div');
     container.classList.add('recycler_view_item');
-    const renderer = new this._renderer();
+    const renderer = new this._renderer(virtualElement.data);
 
     renderer.initialize({
       api: this,

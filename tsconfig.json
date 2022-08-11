@@ -1,7 +1,7 @@
 
 /* Visit https://aka.ms/tsconfig.json to read more about this file */
 {
-  "include": [ "src" ],
+  "include": [ "src", "stories" ],
   "exclude": [ "spec", "sample", "stories" ],
   "compilerOptions": {
     "importHelpers": true,

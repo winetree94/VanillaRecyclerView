@@ -58,6 +58,7 @@ export class VirtualElement<T> {
           reusable.wrapperElement.style.width = toPx(this.size);
           break;
       }
+      reusable.wrapperElement.style.position = `absolute`;
       this.wrapperElement = reusable.wrapperElement;
       this.renderer = reusable.renderer;
       if (!this.wrapperElement.parentElement) {
