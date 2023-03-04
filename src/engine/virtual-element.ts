@@ -59,6 +59,7 @@ export class VirtualElement<T> {
           break;
       }
       this.wrapperElement = reusable.wrapperElement;
+      this.wrapperElement.classList.remove('hidden');
       this.renderer = reusable.renderer;
       if (!this.wrapperElement.parentElement) {
         this.parent.container.appendChild(this.wrapperElement);
@@ -81,6 +82,7 @@ export class VirtualElement<T> {
           index: this.index,
         });
       }
+      wrapperElement?.classList.add('hidden');
       return {
         renderer: renderer,
         wrapperElement: wrapperElement,
