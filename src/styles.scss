@@ -30,6 +30,10 @@
       position: absolute;
       display: flex;
       // border-bottom: 1px solid red;
+
+      &.hidden {
+        visibility: hidden;
+      }
     }
   }
 }
