@@ -249,7 +249,7 @@ export interface VanillaRecyclerViewAPI<T> {
    * Recalculates the entire scroll area, and reassigns index and element-specific size to all virtual DOM objects.
    * This function is called automatically internally as needed, and there is no need to call it manually.
    */
-  calcalateSize: () => void;
+  calculateSize: () => void;
   /*
    * Returns the entire scroll area in px.
    */
